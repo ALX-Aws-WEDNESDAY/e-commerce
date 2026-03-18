@@ -59,6 +59,7 @@ class UserRegisterViewset(viewsets.ModelViewSet):
         
         refresh = RefreshToken.for_user(user)
         user_roles = Roles.objects.filter(user=user).values_list('role', flat=True)
+        refresh["roles"] = list(user_roles)
         
         return Response({
             'user': UserSerializer(user).data,
