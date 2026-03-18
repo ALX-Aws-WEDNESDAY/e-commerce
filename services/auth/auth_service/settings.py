@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'users',
     'drf_yasg',
+    'rest_framework_simplejwt.token_blacklist',
+    'django_redis'
 ]
 
 MIDDLEWARE = [
