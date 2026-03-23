@@ -7,7 +7,7 @@ The project is architected to be connected to a robust Django/PostgreSQL backend
 ## ✨ Key Features
 
 - **Seamless Shopping Journey**: Fully interactive product catalogs, detail pages, and a persistent slide-out cart.
-- **Production-Ready Checkout**: Multi-step checkout form with user-friendly validation, supporting local payment methods (M-Pesa, Cash on Delivery, Card). 
+- **Production-Ready Checkout**: Multi-step checkout form with user-friendly validation, supporting local payment methods (M-Pesa, Cash on Delivery, Card).
 - **Order Success Flow**: Dedicated, polished success confirmations providing direct feedback and reference IDs immediately after purchase.
 - **Mobile-First Responsive Design**: Beautiful UI powered by Tailwind CSS. Every grid, drawer, and action button dynamically stacks and scales for a flawless experience on smartphones and tablets.
 - **Secure Authentication UI**: Pre-built Login, Registration, and Account Profile screens. Includes logic for `X-CSRFToken` handling, fully prepared for Django session cookies.
@@ -23,15 +23,13 @@ The project is architected to be connected to a robust Django/PostgreSQL backend
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - npm or yarn
 
 ### Installation & Execution
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd ecommerce-frontend
 
 # Install dependencies
 npm install
@@ -79,7 +77,7 @@ npm run preview
 
 ## 🤝 Next Steps for Backend Integration
 
-This frontend was explicitly prepared to be plugged into a Django REST Framework API. 
+This frontend was explicitly prepared to be plugged into a Django REST Framework API.
 The Axios client in `src/api/client.ts` is pre-configured with `withCredentials: true` to seamlessly accept backend HttpOnly cookies and attach necessary CSRF validation headers for secure mutation requests.
 
 ## 📄 License

@@ -156,15 +156,23 @@ REST_FRAMEWORK ={
     'PAGE_SIZE': 20,
 }
 
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.getenv('REDIS_URL'),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+if "REDIS_URL" in os.environ and os.environ.get("REDIS_URL"):
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": os.getenv('REDIS_URL'),
+            "OPTIONS": {
+                "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            }
         }
     }
-}
+else:
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "unique-snowflake",
+        }
+    }
 
 # Custom User Model
 AUTH_USER_MODEL = 'users.User'

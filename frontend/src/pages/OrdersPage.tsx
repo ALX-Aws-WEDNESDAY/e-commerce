@@ -41,9 +41,9 @@ export const OrdersPage: React.FC = () => {
   if (!orders || orders.length === 0) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">My Orders</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 transition-colors">My Orders</h1>
         <div className="text-center py-12">
-          <p className="text-gray-600 mb-4">You haven't placed any orders yet.</p>
+          <p className="text-gray-600 dark:text-gray-300 mb-4 transition-colors">You haven't placed any orders yet.</p>
           <button
             onClick={() => navigate('/products')}
             className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
@@ -57,7 +57,7 @@ export const OrdersPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">My Orders</h1>
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 transition-colors">My Orders</h1>
       
       <div className="space-y-6">
         {orders.map((order) => (

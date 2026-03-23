@@ -22,20 +22,20 @@ export const OrderSuccessPage: React.FC = () => {
       <div className="flex justify-center mb-6">
         <CheckCircle2 className="h-20 w-20 text-brand-500" />
       </div>
-      <h1 className="text-4xl font-bold text-gray-900 mb-4">Order Placed Successfully!</h1>
-      <p className="text-lg text-gray-600 mb-8">
-        Thank you for your purchase. Your order <span className="font-semibold px-2 py-1 bg-gray-100 rounded">#{newOrder.reference}</span> is confirmed.
+      <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4 transition-colors">Order Placed Successfully!</h1>
+      <p className="text-lg text-gray-600 dark:text-gray-300 mb-8 transition-colors">
+        Thank you for your purchase. Your order <span className="font-semibold px-2 py-1 bg-gray-100 dark:bg-secondary-800 text-gray-900 dark:text-white rounded transition-colors">#{newOrder.reference}</span> is confirmed.
       </p>
       
-      <div className="bg-white rounded-lg shadow-sm border p-6 mb-8 text-left">
-        <h2 className="font-semibold text-lg mb-4 border-b pb-2">Order Summary</h2>
-        <div className="space-y-2 text-gray-600 mb-4">
-          <p><strong>Shipping to:</strong> {newOrder.shipping_address.full_name}</p>
-          <p><strong>Address:</strong> {newOrder.shipping_address.address_line_1}, {newOrder.shipping_address.city}</p>
+      <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-transparent dark:border-secondary-700 p-6 mb-8 text-left transition-colors">
+        <h2 className="font-semibold text-lg mb-4 border-b dark:border-secondary-700 pb-2 text-gray-900 dark:text-white transition-colors">Order Summary</h2>
+        <div className="space-y-2 text-gray-600 dark:text-gray-300 mb-4 transition-colors">
+          <p><strong className="text-gray-900 dark:text-white transition-colors">Shipping to:</strong> {newOrder.shipping_address.full_name}</p>
+          <p><strong className="text-gray-900 dark:text-white transition-colors">Address:</strong> {newOrder.shipping_address.address_line_1}, {newOrder.shipping_address.city}</p>
         </div>
-        <div className="flex justify-between font-bold text-gray-900 text-lg border-t pt-4">
+        <div className="flex justify-between font-bold text-gray-900 dark:text-white text-lg border-t dark:border-secondary-700 pt-4 transition-colors">
           <span>Amount Paid:</span>
-          <span className="text-brand-600">KES {newOrder.total}</span>
+          <span className="text-brand-600 dark:text-brand-400 transition-colors">KES {newOrder.total}</span>
         </div>
       </div>
 
