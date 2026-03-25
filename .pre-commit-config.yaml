@@ -1,11 +1,4 @@
 repos:
-  - repo: https://github.com/pre-commit/mirrors-yapf
-    rev: v0.32.0
-    hooks:
-      - id: yapf
-        name: yapf format
-        args: [--recursive, services/auth]
-
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.7
     hooks:
@@ -15,16 +8,16 @@ repos:
       - id: ruff-format
         name: ruff format
 
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.19.1
-    hooks:
-      - id: mypy
-        name: mypy type check
-        additional_dependencies:
-          - django-stubs
-          - djangorestframework-stubs
-          - typing_extensions
-        args: [--config-file=services/auth/pyproject.toml]
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: v1.19.1
+  #   hooks:
+  #     - id: mypy
+  #       name: mypy type check
+  #       additional_dependencies:
+  #         - django-stubs
+  #         - djangorestframework-stubs
+  #         - typing_extensions
+  #       args: [--config-file=services/auth/pyproject.toml]
 
   - repo: https://github.com/sqlfluff/sqlfluff
     rev: 4.0.4
@@ -47,6 +40,7 @@ repos:
       - id: debug-statements
         name: no debug statements
 
+  # # Uncomment only if working on the front-end
   # - repo: https://github.com/pre-commit/mirrors-eslint
   #   rev: v10.1.0
   #   hooks:

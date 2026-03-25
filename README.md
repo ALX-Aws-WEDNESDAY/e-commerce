@@ -58,5 +58,3 @@ Notes
 
 Collaboration
 - See `CONTRIBUTING.md` for contribution guidelines, PR process, testing expectations, and communication channels.
-
-
