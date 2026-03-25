@@ -32,4 +32,3 @@ Thank you for your interest in contributing to this project! Please follow these
 
 8. Code of Conduct
 - Be respectful and follow the project's Code of Conduct.
-
