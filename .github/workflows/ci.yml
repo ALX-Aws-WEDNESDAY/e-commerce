@@ -1,51 +1,512 @@
-name: python ci
+name: Unified CI/CD Pipeline
+
 on:
-    push:
-        branches: [main]
-    pull_request:
-        branches: [main]
+  push:
+    branches: [main, dev, staging]
+  pull_request:
+    branches: [main, dev, staging]
+
+env:
+  NODE_VERSION: "20"
+  PYTHON_VERSION: "3.11"
+
 jobs:
-    #--------------------------------------
-    # Check the formating and trailing spaces
-    #---------------------------------------
-    lint:
-        name: Lint Code Base
-        runs-on: ubuntu-latest
-        
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v2
+  # ============================================================================
+  # FRONTEND JOBS: Lint, Build, and Test
+  # ============================================================================
 
-            - name: Set up Python
-              uses: actions/setup-python@v4
-              with:
-                python-version: '3.x'
-                cache: 'pip'
+  frontend-lint:
+    name: Frontend - Lint Code Base
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' ||
+      contains(github.event.head_commit.modified, 'frontend/') ||
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/dev' ||
+      github.ref == 'refs/heads/staging'
 
-            - name: Install flake8
-              run: pip install flake8
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-            - name: Run flake8
-              run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-    #--------------------------------------
-    
-    test:
-        name: Run Tests
-        needs: lint
-        runs-on: ubuntu-latest
-        
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: "./frontend/package-lock.json"
 
-            - name: Set up Python
-              uses: actions/setup-python@v4
-              with:
-                python-version: '3.x'
-                cache: 'pip'
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
 
-            - name: Install dependencies
-              run: pip install -r requirements.txt
+      - name: Run ESLint
+        working-directory: ./frontend
+        run: npm run lint
+        continue-on-error: false
 
-            - name: Run tests
-              run: pytest tests/
+  frontend-build:
+    name: Frontend - Build
+    runs-on: ubuntu-latest
+    needs: frontend-lint
+    if: |
+      github.event_name == 'pull_request' ||
+      contains(github.event.head_commit.modified, 'frontend/') ||
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/dev' ||
+      github.ref == 'refs/heads/staging'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: "./frontend/package-lock.json"
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Build application
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: ./frontend/dist
+          retention-days: 7
+
+  frontend-test:
+    name: Frontend - Unit Tests & Coverage
+    runs-on: ubuntu-latest
+    needs: frontend-lint
+    if: |
+      github.event_name == 'pull_request' ||
+      contains(github.event.head_commit.modified, 'frontend/') ||
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/dev' ||
+      github.ref == 'refs/heads/staging'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: "./frontend/package-lock.json"
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Run tests with coverage
+        working-directory: ./frontend
+        run: npm run test:ci
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: ./frontend/coverage
+          retention-days: 7
+
+      # Branch-specific coverage enforcement
+      - name: Check coverage threshold (main)
+        if: github.ref == 'refs/heads/main'
+        working-directory: ./frontend
+        run: |
+          COVERAGE=$(grep -oP '"lines":\s*{\s*"pct":\s*\K[0-9.]+' coverage/coverage-summary.json)
+          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+            echo "Coverage $COVERAGE% is below 80% threshold for main branch"
+            exit 1
+          fi
+
+      - name: Check coverage threshold (staging)
+        if: github.ref == 'refs/heads/staging'
+        working-directory: ./frontend
+        run: |
+          COVERAGE=$(grep -oP '"lines":\s*{\s*"pct":\s*\K[0-9.]+' coverage/coverage-summary.json)
+          if (( $(echo "$COVERAGE < 70" | bc -l) )); then
+            echo "Coverage $COVERAGE% is below 70% threshold for staging branch"
+            exit 1
+          fi
+
+      - name: Check coverage threshold (dev)
+        if: github.ref == 'refs/heads/dev'
+        working-directory: ./frontend
+        run: |
+          COVERAGE=$(grep -oP '"lines":\s*{\s*"pct":\s*\K[0-9.]+' coverage/coverage-summary.json)
+          if (( $(echo "$COVERAGE < 60" | bc -l) )); then
+            echo "Coverage $COVERAGE% is below 60% threshold for dev branch"
+            exit 1
+          fi
+
+  # ============================================================================
+  # BACKEND JOBS: Lint, Test, and Migration Check
+  # ============================================================================
+
+  backend-lint:
+    name: Backend - Lint & Format Check
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' ||
+      contains(github.event.head_commit.modified, 'services/') ||
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/dev' ||
+      github.ref == 'refs/heads/staging'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+          cache-dependency-path: "./services/auth/requirements.txt"
+
+      - name: Install dependencies
+        working-directory: ./services/auth
+        run: pip install -r requirements.txt
+
+      - name: Run flake8 (strict mode)
+        working-directory: ./services/auth
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=100 --statistics
+
+      - name: Run black format check
+        working-directory: ./services/auth
+        run: black --check --line-length=100 .
+
+      - name: Run isort import sorting check
+        working-directory: ./services/auth
+        run: isort --check-only --profile=black .
+
+  backend-test:
+    name: Backend - Unit Tests & Coverage
+    runs-on: ubuntu-latest
+    needs: backend-lint
+    if: |
+      github.event_name == 'pull_request' ||
+      contains(github.event.head_commit.modified, 'services/') ||
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/dev' ||
+      github.ref == 'refs/heads/staging'
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: auth_service_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: "pip"
+          cache-dependency-path: "./services/auth/requirements.txt"
+
+      - name: Install dependencies
+        working-directory: ./services/auth
+        run: pip install -r requirements.txt
+
+      - name: Wait for PostgreSQL
+        run: |
+          until pg_isready -h localhost -p 5432; do
+            echo 'waiting for postgres...'
+            sleep 1
+          done
+
+      - name: Run migrations
+        working-directory: ./services/auth
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/auth_service_test
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test-secret-key
+          DEBUG: "False"
+        run: python manage.py migrate
+
+      - name: Run pytest with coverage (main branch)
+        if: github.ref == 'refs/heads/main'
+        working-directory: ./services/auth
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/auth_service_test
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test-secret-key
+          DEBUG: "False"
+        run: |
+          pytest . \
+            --cov=. \
+            --cov-report=term-report \
+            --cov-report=xml \
+            --cov-report=html \
+            --cov-fail-under=80 \
+            --junitxml=test-results.xml
+
+      - name: Run pytest with coverage (staging branch)
+        if: github.ref == 'refs/heads/staging'
+        working-directory: ./services/auth
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/auth_service_test
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test-secret-key
+          DEBUG: "False"
+        run: |
+          pytest . \
+            --cov=. \
+            --cov-report=term-report \
+            --cov-report=xml \
+            --cov-report=html \
+            --cov-fail-under=70 \
+            --junitxml=test-results.xml
+
+      - name: Run pytest with coverage (dev branch)
+        if: github.ref == 'refs/heads/dev'
+        working-directory: ./services/auth
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/auth_service_test
+          REDIS_URL: redis://localhost:6379/0
+          SECRET_KEY: test-secret-key
+          DEBUG: "False"
+        run: |
+          pytest . \
+            --cov=. \
+            --cov-report=term-report \
+            --cov-report=xml \
+            --cov-report=html \
+            --cov-fail-under=60 \
+            --junitxml=test-results.xml
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: ./services/auth/htmlcov
+          retention-days: 7
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: ./services/auth/test-results.xml
+          retention-days: 7
+
+  backend-migrations:
+    name: Backend - Migration Check
+    runs-on: ubuntu-latest
+    needs: backend-lint
+    if: |
+      github.event_name == 'pull_request' ||
+      contains(github.event.head_commit.modified, 'services/') ||
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/dev' ||
+      github.ref == 'refs/heads/staging'
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: auth_service_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install flake8
+        run: pip install flake8
+
+      - name: Run flake8
+        run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+  #--------------------------------------
+  test:
+      name: Run Tests
+      needs: lint
+      runs-on: ubuntu-latest
+
+      steps:
+          - name: Checkout code
+            uses: actions/checkout@v2
+
+          - name: Set up Python
+            uses: actions/setup-python@v2
+            with:
+              python-version: '3.x'
+
+          - name: Install dependencies
+            working-directory: ./services/auth
+            run: pip install -r requirements.txt
+
+          - name: Run Safety check (Python dependencies)
+            working-directory: ./services/auth
+            run: |
+              safety check --json || ([ "$GITHUB_REF" == "refs/heads/main" ] && exit 1 || exit 0)
+
+          - name: Set up Node.js
+            uses: actions/setup-node@v4
+            with:
+              node-version: ${{ env.NODE_VERSION }}
+              cache: "npm"
+              cache-dependency-path: "./frontend/package-lock.json"
+
+          - name: Run npm audit (frontend dependencies)
+            working-directory: ./frontend
+            run: |
+              npm audit --audit-level=moderate || ([ "$GITHUB_REF" == "refs/heads/main" ] && exit 2 || exit 0)
+
+  security-secrets:
+    name: Security - Secrets Detection
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' ||
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/dev' ||
+      github.ref == 'refs/heads/staging'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_COMMENTS: true
+
+  security-sast:
+    name: Security - SAST (Bandit)
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' ||
+      github.ref == 'refs/heads/main' ||
+      github.ref == 'refs/heads/dev' ||
+      github.ref == 'refs/heads/staging'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Bandit
+        run: pip install bandit
+
+      - name: Run Bandit (SAST for Python)
+        working-directory: ./services/auth
+        run: |
+          bandit -r . --severity-level=medium --format=json --exit-code=1 > bandit-report.json || \
+          ([ "$GITHUB_REF" == "refs/heads/main" ] && exit 1 || echo "⚠️  Bandit findings detected (advisory for non-main branches)")
+
+      - name: Upload Bandit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bandit-report
+          path: ./services/auth/bandit-report.json
+          retention-days: 7
+
+  # ============================================================================
+  # SUMMARY JOB: Ensure all required checks pass
+  # ============================================================================
+
+  ci-summary:
+    name: CI Pipeline Summary
+    runs-on: ubuntu-latest
+    needs:
+      [
+        frontend-lint,
+        frontend-build,
+        frontend-test,
+        backend-lint,
+        backend-test,
+        backend-migrations,
+        # security-dependencies,
+        security-secrets,
+        security-sast,
+      ]
+    if: always()
+
+    steps:
+      - name: Check job statuses
+        run: |
+          echo "🔍 CI Pipeline Status Summary"
+          echo "=============================="
+          echo "Frontend Lint: ${{ needs.frontend-lint.result }}"
+          echo "Frontend Build: ${{ needs.frontend-build.result }}"
+          echo "Frontend Tests: ${{ needs.frontend-test.result }}"
+          echo "Backend Lint: ${{ needs.backend-lint.result }}"
+          echo "Backend Tests: ${{ needs.backend-test.result }}"
+          echo "Backend Migrations: ${{ needs.backend-migrations.result }}"
+          echo "Security - Secrets: ${{ needs.security-secrets.result }}"
+          echo "Security - SAST: ${{ needs.security-sast.result }}"
+          echo "=============================="
+
+      - name: Fail if any required job failed
+        if: |
+          needs.frontend-lint.result == 'failure' ||
+          needs.frontend-build.result == 'failure' ||
+          needs.frontend-test.result == 'failure' ||
+          needs.backend-lint.result == 'failure' ||
+          needs.backend-test.result == 'failure' ||
+          needs.backend-migrations.result == 'failure' ||
+          needs.security-secrets.result == 'failure' ||
+          needs.security-sast.result == 'failure'
+        run: exit 1
+
+      - name: All CI checks passed ✅
+        run: echo "✅ All CI checks passed successfully!"

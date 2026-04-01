@@ -1,0 +1,62 @@
+# GitHub CODEOWNERS file
+
+# This file defines who should review code changes in specific paths
+
+# See <https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners>
+
+# Global owners (default for any file not matched by more specific rules)
+
+* @owner
+
+# Frontend code ownership
+
+/frontend/                          @frontend-team
+/frontend/src/**/*.tsx              @frontend-team
+/frontend/src/**/*.ts               @frontend-team
+/frontend/package.json              @frontend-team
+/frontend/package-lock.json         @frontend-team
+/frontend/vite.config.ts            @frontend-team
+/frontend/tsconfig.json             @frontend-team
+/frontend/eslint.config.js          @frontend-team
+
+# Backend/Services ownership
+
+/services/                          @backend-team
+/services/auth/**/*.py              @backend-team
+/services/auth/requirements.txt     @backend-team
+/services/auth/manage.py            @backend-team
+/services/auth/settings.py          @backend-team
+/services/auth/docker-compose.yml   @backend-team
+/services/auth/Dockerfile           @backend-team
+
+# CI/CD and Infrastructure
+
+/.github/workflows/                 @devops-team @frontend-team @backend-team
+/.github/CODEOWNERS                 @devops-team
+/docker-compose.yml                 @devops-team
+/Dockerfile                         @devops-team
+
+# Root configuration files
+
+*.md                                @owner
+.gitignore                          @owner
+.env.example                        @owner
+requirements.txt                    @backend-team
+
+# Tests
+
+/tests/                             @backend-team
+/frontend/src/**/**tests**/         @frontend-team
+/frontend/src/**/*.test.tsx         @frontend-team
+/frontend/src/**/*.spec.tsx         @frontend-team
+/services/auth/**/tests.py          @backend-team
+
+# Notes
+
+# Replace @owner, @frontend-team, @backend-team, @devops-team with actual GitHub usernames or team names
+
+# Example
+
+# /frontend/  @username1 @username2
+
+# /services/  @username3 @org/backend-team
