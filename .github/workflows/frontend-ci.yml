@@ -1,20 +1,33 @@
-name: frontend ci
+name: Frontend CI
 
+# Trigger block
 on:
   push:
-    branches: [main, dev]
+    branches:
+      - main
+      - dev
+      - staging
+    paths:
+      - "frontend/**"
   pull_request:
-    branches: [main, dev]
+    branches:
+      - main
+      - dev
+      - staging
+    paths:
+      - "frontend/**"
+
+# Env block
+env:
+  NODE_VERSION: "20"
 
 jobs:
-  lint-and-build:
-    name: Lint Code Base and Build
+  # Frontend lint job
+  frontend-lint:
     runs-on: ubuntu-latest
-    
     defaults:
       run:
         working-directory: ./frontend
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,18 +35,117 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: './frontend/package-lock.json'
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ./frontend/package-lock.json
 
       - name: Install dependencies
-        run: |
-          npm ci
+        run: npm ci
 
-      - name: Lint Code Base
-        run: |
-          npm run lint
+      - name: Run ESLint
+        run: npm run lint
 
-      - name: Run Build
+  # Frontend build job
+  frontend-build:
+    needs: frontend-lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ./frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: ./frontend/dist
+          retention-days: 7
+
+  # Frontend test job
+  frontend-test:
+    needs: frontend-lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ./frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run frontend tests
+        run: npm run test:ci
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: ./frontend/coverage
+          retention-days: 7
+
+      - name: Set coverage threshold
         run: |
-          npm run build
+          target_branch="${GITHUB_BASE_REF:-${GITHUB_REF_NAME}}"
+          case "$target_branch" in
+            dev)
+              threshold=60
+              ;;
+            staging)
+              threshold=70
+              ;;
+            main)
+              threshold=80
+              ;;
+            *)
+              echo "Unsupported branch for coverage threshold: $target_branch"
+              exit 1
+              ;;
+          esac
+          echo "COVERAGE_THRESHOLD=$threshold" >> "$GITHUB_ENV"
+
+      - name: Check coverage thresholds
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+
+          const summaryPath = path.resolve('coverage', 'coverage-summary.json');
+          if (!fs.existsSync(summaryPath)) {
+            throw new Error(`Coverage summary not found at ${summaryPath}`);
+          }
+
+          const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
+          const threshold = Number(process.env.COVERAGE_THRESHOLD);
+          const metrics = ['statements', 'branches', 'functions', 'lines'];
+          const failingMetrics = metrics.filter((metric) => (summary.total?.[metric]?.pct ?? 0) < threshold);
+
+          if (failingMetrics.length > 0) {
+            throw new Error(`Coverage below ${threshold}% for: ${failingMetrics.join(', ')}`);
+          }
+
+          console.log(`Coverage passed with threshold ${threshold}%`);
+          NODE
