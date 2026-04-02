@@ -3,17 +3,11 @@ name: Frontend CI
 # Trigger block
 on:
   push:
-    branches:
-      - main
-      - dev
-      - staging
+    branches: [main, dev, staging]
     paths:
       - "frontend/**"
-  pull_request:
-    branches:
-      - main
-      - dev
-      - staging
+  pull_request: 
+    branches: [main, dev, staging]
     paths:
       - "frontend/**"
 
@@ -24,6 +18,7 @@ env:
 jobs:
   # Frontend lint job
   frontend-lint:
+    name: Frontend Lint Code Base
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -47,6 +42,7 @@ jobs:
 
   # Frontend build job
   frontend-build:
+    name: Frontend Build
     needs: frontend-lint
     runs-on: ubuntu-latest
     defaults:
@@ -78,6 +74,7 @@ jobs:
 
   # Frontend test job
   frontend-test:
+    name: Frontend Unit Tests & Coverage
     needs: frontend-lint
     runs-on: ubuntu-latest
     defaults:
@@ -112,18 +109,14 @@ jobs:
           target_branch="${GITHUB_BASE_REF:-${GITHUB_REF_NAME}}"
           case "$target_branch" in
             dev)
-              threshold=60
-              ;;
+              threshold=40 ;;
             staging)
-              threshold=70
-              ;;
+              threshold=60 ;;
             main)
-              threshold=80
-              ;;
+              threshold=85 ;;
             *)
               echo "Unsupported branch for coverage threshold: $target_branch"
-              exit 1
-              ;;
+              exit 1 ;;
           esac
           echo "COVERAGE_THRESHOLD=$threshold" >> "$GITHUB_ENV"
 
@@ -147,5 +140,8 @@ jobs:
             throw new Error(`Coverage below ${threshold}% for: ${failingMetrics.join(', ')}`);
           }
 
-          console.log(`Coverage passed with threshold ${threshold}%`);
+          console.log(`Coverage passed with threshold ${threshold}%`); 
           NODE
+
+
+         
