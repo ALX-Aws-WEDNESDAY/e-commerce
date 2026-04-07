@@ -38,34 +38,31 @@ class UserRegisterViewset(viewsets.ModelViewSet):
         
         # Create default user role
         Roles.objects.create(user=user, role='user')
-        
-        #refresh = RefreshToken.for_user(user)
         return Response({
             'user': UserSerializer(user).data,
-            #'refresh': str(refresh),
-            #'access': str(refresh.access_token),
             'message': 'User registered successfully'
         }, status=status.HTTP_201_CREATED)
 
     @action(detail=False, methods=['post'], permission_classes=[AllowAny])
     def login(self, request):
-    
         #Login user with email and password
-
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['email']
         user = User.objects.get(email = email)
         
         refresh = RefreshToken.for_user(user)
+        access = refresh.access_token
         user_roles = Roles.objects.filter(user=user).values_list('role', flat=True)
         refresh["roles"] = list(user_roles)
         refresh["user_id"] = user.id
+        access["roles"] = list(user_roles)
+        access["user_id"] = user.id
         
         return Response({
             'user': UserSerializer(user).data,
             'refresh': str(refresh),
-            'access': str(refresh.access_token),
+            'access': str(access),
             'message': 'Login successful'
         }, status=status.HTTP_200_OK)
 
@@ -193,7 +190,7 @@ class UserRegisterViewset(viewsets.ModelViewSet):
         is_admin = Roles.objects.filter(
             user=user,
             role__iexact='admin'
-        ).exists()
+        ).exists() 
         
         if is_admin:
             return User.objects.all()

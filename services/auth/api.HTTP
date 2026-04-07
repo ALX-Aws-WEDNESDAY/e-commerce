@@ -1,8 +1,6 @@
-@host = http://localhost:8000
-@access_token = 
-
-@refresh_token =
-
+@host = http://localhost:8003
+@access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc0OTcwNDQ1LCJpYXQiOjE3NzQ5NjY4NDUsImp0aSI6ImUzMTk5ZDcyMDNjNTQ1N2JhMjQwMGNiNzIwMjM4MDgyIiwidXNlcl9pZCI6Niwicm9sZXMiOlsiYWRtaW4iXX0.YdWqLjwpUO8g3frXtO9RZWIzpOxQQ1n91B6WuTM1Sy8
+@refresh_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc3NTU3MTY0NSwiaWF0IjoxNzc0OTY2ODQ1LCJqdGkiOiJmZjQwM2FjZmEzYmU0OTM3OGE5ZjA5MzQ1YzM3MzNlZiIsInVzZXJfaWQiOjYsInJvbGVzIjpbImFkbWluIl19.7HTSupR3LvrbRK1-MC9d6kb23U1TIxWvjpvvBXQNfxc
 # 1) Register user (public)
 ### User registration
 POST {{host}}/api/users/register/
@@ -21,16 +19,21 @@ Content-Type: application/json
 POST {{host}}/api/users/login/
 Content-Type: application/json
 
+# {
+#   "email": "testuser@example.com",
+#   "password": "StrongPass123"
+# }
+
 {
-  "email": "testuser@example.com",
-  "password": "StrongPass123"
+  "email": "lovedaniel@example.net",
+  "password": "TestPass1234"
 }
 
 
 # 3) Refresh token via custom endpoint (requires access token)
 ### Custom refresh_token
 POST {{host}}/api/users/refresh_token/
-Authorization: Bearer {{refresh_token}}
+Authorization: Bearer {{access_token}}
 Content-Type: application/json
 
 {
@@ -72,7 +75,7 @@ Authorization: Bearer {{access_token}}
 Content-Type: application/json
 
 {
-  "role": "admin"
+  "role": "agent"
 }
 
 # 8) Logout (requires access token)
