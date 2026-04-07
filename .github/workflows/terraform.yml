@@ -4,12 +4,12 @@ on:
   push:
     branches: [ main, dev, staging ]
     paths:
-      - '01_org_setup/**'
+      - 'aws_infrastructure/01_org_setup/**'
       - '.github/workflows/ci.yml'
   pull_request:
     branches: [ main, dev, staging ]
     paths:
-      - '01_org_setup/**'
+      - 'aws_infrastructure/01_org_setup/**'
       - '.github/workflows/ci.yml'
 
 jobs:
@@ -23,12 +23,12 @@ jobs:
     strategy:
       matrix:
         path: [
-          '01_org_setup/00_bootstrap',
-          '01_org_setup/01_org',
-          '01_org_setup/02_identity/scps',
-          '01_org_setup/03_security/01_management_iam',
-          '01_org_setup/03_security/02_cloudtrail',
-          '01_org_setup/03_security/03_github_oidc'
+          'aws_infrastructure/01_org_setup/00_bootstrap',
+          'aws_infrastructure/01_org_setup/01_org',
+          'aws_infrastructure/01_org_setup/02_identity/scps',
+          'aws_infrastructure/01_org_setup/03_security/01_management_iam',
+          'aws_infrastructure/01_org_setup/03_security/02_cloudtrail',
+          'aws_infrastructure/01_org_setup/03_security/03_github_oidc'
         ]
 
     defaults:
