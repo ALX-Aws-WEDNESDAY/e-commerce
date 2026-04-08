@@ -31,7 +31,7 @@ djangorestframework_simplejwt==5.5.1
 dparse==0.6.4
 drf-yasg==1.21.14
 Faker==30.8.2
-filelock==3.20.3
+# filelock==3.20.3
 flake8==7.3.0
 gunicorn==25.0.3
 h11==0.16.0
