@@ -6,10 +6,12 @@ on:
     paths:
       - 'aws_infrastructure/01_org_setup/**'
       - '.github/workflows/terraform.yml'
+      - '.github/workflows/terraform.yml'
   pull_request:
     branches: [ main, dev, staging ]
     paths:
       - 'aws_infrastructure/01_org_setup/**'
+      - '.github/workflows/terraform.yml'
       - '.github/workflows/terraform.yml'
 
 jobs:
