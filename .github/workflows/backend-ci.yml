@@ -1,0 +1,186 @@
+name: Backend CI
+
+# Trigger block
+on:
+  push:
+    branches: [main, dev, staging]
+    paths:
+      - "services/**"
+  pull_request:
+    branches: [main, dev, staging]
+    paths:
+      - "services/**"
+
+# Env block
+env:
+  PYTHON_VERSION: "3.11"
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/auth_service_test
+  REDIS_URL: redis://localhost:6379/0
+  SECRET_KEY: test-secret-key
+  DEBUG: "False"
+
+jobs:
+  # Backend lint job
+  backend-lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./services/auth
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: uv pip install --system -r requirements.txt
+
+      - name: Run Ruff check
+        run: ruff check .
+
+      - name: Run Ruff format check
+        run: ruff format --check .
+
+  # Backend test job
+  backend-test:
+    needs: backend-lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./services/auth
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: auth_service_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d auth_service_test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: uv pip install --system -r requirements.txt
+
+      - name: Set coverage threshold
+        run: |
+          target_branch="${GITHUB_BASE_REF:-${GITHUB_REF_NAME}}"
+          case "$target_branch" in
+            dev)
+              threshold=60
+              ;;
+            staging)
+              threshold=70
+              ;;
+            main)
+              threshold=80
+              ;;
+            *)
+              echo "Unsupported branch for coverage threshold: $target_branch"
+              exit 1
+              ;;
+          esac
+          echo "COVERAGE_THRESHOLD=$threshold" >> "$GITHUB_ENV"
+
+      - name: Run migrations
+        run: python manage.py migrate
+
+      - name: Run pytest with coverage
+        run: |
+          mkdir -p test-results
+          pytest \
+            --cov=. \
+            --cov-report=xml:coverage.xml \
+            --cov-report=html:coverage \
+            --junitxml=test-results/junit.xml
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: |
+            ./services/auth/coverage
+            ./services/auth/coverage.xml
+          retention-days: 7
+
+      - name: Upload test results artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: ./services/auth/test-results
+          retention-days: 7
+
+      - name: Check coverage threshold
+        run: python -m coverage report --fail-under="${COVERAGE_THRESHOLD}"
+
+  # Backend migrations job
+  backend-migrations:
+    needs: backend-lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./services/auth
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: auth_service_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d auth_service_test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        run: uv pip install --system -r requirements.txt
+
+      - name: Run migrations
+        run: python manage.py migrate
+
+      - name: Check for missing migrations
+        run: python manage.py makemigrations --check

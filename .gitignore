@@ -20,6 +20,7 @@ dist/
 # IDEs
 .vscode/
 .idea/
+.amazonq/
 
 # OS files
 .DS_Store

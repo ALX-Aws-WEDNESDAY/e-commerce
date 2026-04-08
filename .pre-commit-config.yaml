@@ -1,0 +1,88 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.7
+    hooks:
+      - id: ruff
+        name: ruff lint
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+        name: ruff format
+
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: v1.19.1
+  #   hooks:
+  #     - id: mypy
+  #       name: mypy type check
+  #       additional_dependencies:
+  #         - django-stubs
+  #         - djangorestframework-stubs
+  #         - typing_extensions
+  #       args: [--config-file=services/auth/pyproject.toml]
+
+  - repo: https://github.com/sqlfluff/sqlfluff
+    rev: 4.0.4
+    hooks:
+      - id: sqlfluff-lint
+        args: [--dialect, postgres]
+        additional_dependencies: ['dbt-postgres==1.10.0', 'sqlfluff-templater-dbt']
+      - id: sqlfluff-fix
+        args: [--dialect, postgres]
+        additional_dependencies: ['dbt-postgres==1.10.0', 'sqlfluff-templater-dbt']
+
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.105.0
+    hooks:
+      - id: terraform_fmt
+        files: ^aws_infrastructure/
+
+      # bootstrap uses local state — -backend=false lets validate resolve
+      # provider schemas without credentials, matching the CI behaviour.
+      - id: terraform_validate
+        name: terraform_validate (bootstrap)
+        files: ^aws_infrastructure/01_org_setup/00_bootstrap/
+        args:
+          - --args=-backend=false
+
+      # All other modules use a remote S3 backend. validate runs after
+      # terraform init which requires AWS credentials to be active locally.
+      - id: terraform_validate
+        name: terraform_validate (remote-backend modules)
+        files: ^aws_infrastructure/
+        exclude: ^aws_infrastructure/01_org_setup/00_bootstrap/
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: debug-statements
+        name: no debug statements
+
+  # # Uncomment only if working on the front-end
+  # - repo: https://github.com/pre-commit/mirrors-eslint
+  #   rev: v10.1.0
+  #   hooks:
+  #     - id: eslint
+  #       additional_dependencies:
+  #         - eslint@9.39.0
+  #         - eslint-plugin-react-hooks@7.0.1
+  #         - eslint-plugin-react-refresh@0.5.2
+  #       files: ^frontend/.*\.(js|ts|jsx|tsx)$
+  #       args: [--config, frontend/eslint.config.js, --ext, '.js,.jsx,.ts,.tsx', 'frontend']
+
+  # - repo: local
+  #   hooks:
+  #     - id: frontend-jest
+  #       name: frontend jest tests
+  #       entry: bash -c "cd frontend && npm ci && npm run test:ci"
+  #       language: system
+  #       pass_filenames: false
+
+  #     - id: backend-migrations
+  #       name: backend migration check
+  #       entry: bash -c "cd services/auth && python manage.py makemigrations --dry-run --check"
+  #       language: system
+  #       pass_filenames: false
