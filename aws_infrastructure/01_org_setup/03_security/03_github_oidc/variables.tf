@@ -13,11 +13,13 @@ variable "state_bucket" {
 variable "github_org" {
   description = "GitHub organisation or user name that owns the repository."
   type        = string
+  default = "ALX-Aws-WEDNESDAY"
 }
 
 variable "github_repo" {
   description = "GitHub repository name (without the org prefix)."
   type        = string
+  default = "e-commerce"
 }
 
 variable "github_actions_role_name" {
