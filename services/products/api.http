@@ -2,9 +2,8 @@
 # Base URL: http://localhost:8000
 # Replace YOUR_JWT_TOKEN with actual JWT token from auth service
 @host = http://localhost:8001
-@access_token = 
-
-@refresh_token = 
+@access_token =
+@refresh_token =
 ### ============================================================================
 ### PRODUCTS ENDPOINTS
 ### ============================================================================
