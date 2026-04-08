@@ -5,12 +5,12 @@ on:
     branches: [ main, dev, staging ]
     paths:
       - 'aws_infrastructure/01_org_setup/**'
-      - '.github/workflows/ci.yml'
+      - '.github/workflows/terraform.yml'
   pull_request:
     branches: [ main, dev, staging ]
     paths:
       - 'aws_infrastructure/01_org_setup/**'
-      - '.github/workflows/ci.yml'
+      - '.github/workflows/terraform.yml'
 
 jobs:
   terraform:
@@ -42,11 +42,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          # After applying 03_github_oidc, replace this with the
-          # github_actions_role_arn output from terraform output.
-          # Repo: ALX-Aws-WEDNESDAY/e-commerce
-           role-to-assume: ${{ secrets.AWS_GITHUB_OICD_ROLE_ARN }}
-           aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_GITHUB_OIDC_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
