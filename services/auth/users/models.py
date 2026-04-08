@@ -1,20 +1,24 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+)
 
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
-            raise ValueError('Email is required')
+            raise ValueError("Email is required")
         email = self.normalize_email(email)
         user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
-    
+
     def create_superuser(self, email, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
         return self.create_user(email, password, **extra_fields)
 
 
@@ -28,13 +32,13 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
     class Meta:
-        ordering = ['-date_joined']
-        verbose_name = 'user'
-        verbose_name_plural = 'users'
+        ordering = ["-date_joined"]
+        verbose_name = "user"
+        verbose_name_plural = "users"
 
     def __str__(self):
         return self.email
@@ -57,9 +61,9 @@ class Roles(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('user', 'role')
-        verbose_name = 'role'
-        verbose_name_plural = 'roles'
+        unique_together = ("user", "role")
+        verbose_name = "role"
+        verbose_name_plural = "roles"
 
     def __str__(self):
         return f"{self.user.email} - {self.role}"

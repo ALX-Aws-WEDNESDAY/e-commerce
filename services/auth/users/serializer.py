@@ -9,30 +9,41 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'password', 'password_confirm']
+        fields = [
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "password",
+            "password_confirm",
+        ]
         extra_kwargs = {
-            'first_name': {'required': False},
-            'last_name': {'required': False},
+            "first_name": {"required": False},
+            "last_name": {"required": False},
         }
 
     def validate(self, data):
-        if User.objects.filter(email=data['email']).exists():
+        if User.objects.filter(email=data["email"]).exists():
             raise serializers.ValidationError({"email": "Email is already in use."})
-        
-        if data['password'] != data['password_confirm']:
+
+        if data["password"] != data["password_confirm"]:
             raise serializers.ValidationError({"password": "Passwords do not match."})
-        
-        if not any(char.isdigit() for char in data['password']):
-            raise serializers.ValidationError({"password": "Password must contain at least one digit."})
-        
-        if not any(char.isupper() for char in data['password']):
-            raise serializers.ValidationError({"password": "Password must contain at least one uppercase letter."})
-        
+
+        if not any(char.isdigit() for char in data["password"]):
+            raise serializers.ValidationError(
+                {"password": "Password must contain at least one digit."}
+            )
+
+        if not any(char.isupper() for char in data["password"]):
+            raise serializers.ValidationError(
+                {"password": "Password must contain at least one uppercase letter."}
+            )
+
         return data
 
     def create(self, validated_data):
-        validated_data.pop('password_confirm', None)
-        password = validated_data.pop('password')
+        validated_data.pop("password_confirm", None)
+        password = validated_data.pop("password")
         user = User.objects.create_user(password=password, **validated_data)
         return user
 
@@ -42,21 +53,21 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        email = data.get('email')
-        password = data.get('password')
+        email = data.get("email")
+        password = data.get("password")
 
         if not email or not password:
             raise serializers.ValidationError("Email and password are required.")
 
         user = authenticate(username=email, password=password)
-        
+
         if not user:
             raise serializers.ValidationError("Invalid email or password.")
-        
+
         if not user.is_active:
             raise serializers.ValidationError("User account is inactive.")
 
-        data['user'] = user
+        data["user"] = user
         return data
 
 
@@ -65,10 +76,18 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'is_active', 'date_joined', 'roles']
+        fields = [
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "is_active",
+            "date_joined",
+            "roles",
+        ]
 
     def get_roles(self, obj):
-        roles = Roles.objects.filter(user=obj).values_list('role', flat=True)
+        roles = Roles.objects.filter(user=obj).values_list("role", flat=True)
         return list(roles)
 
 
@@ -77,8 +96,18 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'is_active', 'is_staff', 'is_superuser', 'date_joined', 'roles']
+        fields = [
+            "id",
+            "email",
+            "first_name",
+            "last_name",
+            "is_active",
+            "is_staff",
+            "is_superuser",
+            "date_joined",
+            "roles",
+        ]
 
     def get_roles(self, obj):
-        roles = Roles.objects.filter(user=obj).values_list('role', flat=True)
+        roles = Roles.objects.filter(user=obj).values_list("role", flat=True)
         return list(roles)

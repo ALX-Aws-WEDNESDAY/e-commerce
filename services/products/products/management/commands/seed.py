@@ -5,20 +5,20 @@ import random
 
 
 class Command(BaseCommand):
-    help = 'Create fake categories and products'
+    help = "Create fake categories and products"
 
     def add_arguments(self, parser):
         parser.add_argument(
-            '--categories',
+            "--categories",
             type=int,
             default=5,
-            help='Number of categories to create',
+            help="Number of categories to create",
         )
         parser.add_argument(
-            '--products',
+            "--products",
             type=int,
             default=20,
-            help='Number of products to create',
+            help="Number of products to create",
         )
 
     def handle(self, *args, **options):
@@ -26,20 +26,22 @@ class Command(BaseCommand):
 
         # Create categories
         categories = []
-        for _ in range(options['categories']):
+        for _ in range(options["categories"]):
             category, created = Category.objects.get_or_create(
                 name=fake.unique.company(),
                 defaults={
-                    'description': fake.text(max_nb_chars=200),
-                    'is_active': True,
-                }
+                    "description": fake.text(max_nb_chars=200),
+                    "is_active": True,
+                },
             )
             if created:
-                self.stdout.write(self.style.SUCCESS(f'Created category: {category.name}'))
+                self.stdout.write(
+                    self.style.SUCCESS(f"Created category: {category.name}")
+                )
             categories.append(category)
 
         # Create products
-        for _ in range(options['products']):
+        for _ in range(options["products"]):
             category = random.choice(categories)
             product = Product.objects.create(
                 name=fake.unique.catch_phrase(),
@@ -49,8 +51,8 @@ class Command(BaseCommand):
                 category=category,
                 quantity_in_stock=random.randint(0, 100),
                 is_in_stock=random.choice([True, False]),
-                status=random.choice(['draft', 'published', 'archived']),
+                status=random.choice(["draft", "published", "archived"]),
             )
-            self.stdout.write(self.style.SUCCESS(f'Created product: {product.name}'))
+            self.stdout.write(self.style.SUCCESS(f"Created product: {product.name}"))
 
-        self.stdout.write(self.style.SUCCESS('Fake data creation completed!'))
+        self.stdout.write(self.style.SUCCESS("Fake data creation completed!"))

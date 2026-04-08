@@ -24,7 +24,7 @@ from drf_yasg import openapi
 schema_view = get_schema_view(
     openapi.Info(
         title="Products API",
-        default_version='v1',
+        default_version="v1",
         description="Product and Category Management API",
         contact=openapi.Contact(email="admin@ecommerce.local"),
         license=openapi.License(name="MIT"),
@@ -36,9 +36,14 @@ schema_view = get_schema_view(
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include("products.urls")),
-    
     # Swagger/OpenAPI Documentation
-    path('api/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('api/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-    path('api/schema/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path(
+        "api/swagger/",
+        schema_view.with_ui("swagger", cache_timeout=0),
+        name="schema-swagger-ui",
+    ),
+    path(
+        "api/redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"
+    ),
+    path("api/schema/", schema_view.without_ui(cache_timeout=0), name="schema-json"),
 ]

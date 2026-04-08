@@ -26,7 +26,7 @@ from rest_framework import permissions
 schema_view = get_schema_view(
     openapi.Info(
         title="Cart & Order API",
-        default_version='v1',
+        default_version="v1",
         description="API for managing shopping carts and orders",
         contact=openapi.Contact(email="support@ecommerce.com"),
     ),
@@ -36,17 +36,20 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    
     # JWT Token endpoints
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
-    
     # App URLs
     path("api/cart/", include("cart.urls")),
     path("api/orders/", include("order.urls")),
-    
     # Swagger/OpenAPI documentation
-    path("api/docs/", schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path("api/redoc/", schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-    path("api/schema/", schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path(
+        "api/docs/",
+        schema_view.with_ui("swagger", cache_timeout=0),
+        name="schema-swagger-ui",
+    ),
+    path(
+        "api/redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"
+    ),
+    path("api/schema/", schema_view.without_ui(cache_timeout=0), name="schema-json"),
 ]
