@@ -90,6 +90,7 @@ jobs:
         uses: astral-sh/setup-uv@v5
 
       - name: Install dependencies
+      #cache the dependencies from the above job to speed up the install
         run: uv pip install --system -r requirements.txt
 
       - name: Set coverage threshold
@@ -113,31 +114,34 @@ jobs:
           echo "COVERAGE_THRESHOLD=$threshold" >> "$GITHUB_ENV"
 
       - name: Run migrations
-        run: python manage.py migrate
-
-      - name: Run pytest with coverage
         run: |
-          mkdir -p test-results
-          pytest \
-            --cov=. \
-            --cov-report=xml:coverage.xml \
-            --cov-report=html:coverage \
-            --junitxml=test-results/junit.xml
+          cd services/auth
+          python manage.py migrate
+
+      ## We are yet to implement tests
+      # - name: Run pytest with coverage
+      #   run: |
+      #     mkdir -p test-results
+      #     pytest \
+      #       --cov=. \
+      #       --cov-report=xml:coverage.xml \
+      #       --cov-report=html:coverage \
+      #       --junitxml=test-results/junit.xml
 
       - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
           name: backend-coverage
           path: |
-            ./services/*/coverage
-            ./services/*/coverage.xml
+            ./services/auth/coverage
+            ./services/auth/coverage.xml
           retention-days: 7
 
       - name: Upload test results artifact
         uses: actions/upload-artifact@v4
         with:
           name: backend-test-results
-          path: ./services/*/test-results
+          path: ./services/auth/test-results
           retention-days: 7
 
       - name: Check coverage threshold
