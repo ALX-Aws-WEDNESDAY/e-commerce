@@ -91,6 +91,7 @@ jobs:
 
       - name: Install dependencies
       #cache the dependencies from the above job to speed up the install
+      #Currently using the root folder requirements file
         run: uv pip install --system -r requirements.txt
 
       - name: Set coverage threshold
