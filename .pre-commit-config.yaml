@@ -29,6 +29,27 @@ repos:
         args: [--dialect, postgres]
         additional_dependencies: ['dbt-postgres==1.10.0', 'sqlfluff-templater-dbt']
 
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.105.0
+    hooks:
+      - id: terraform_fmt
+        files: ^aws_infrastructure/
+
+      # bootstrap uses local state — -backend=false lets validate resolve
+      # provider schemas without credentials, matching the CI behaviour.
+      - id: terraform_validate
+        name: terraform_validate (bootstrap)
+        files: ^aws_infrastructure/01_org_setup/00_bootstrap/
+        args:
+          - --args=-backend=false
+
+      # All other modules use a remote S3 backend. validate runs after
+      # terraform init which requires AWS credentials to be active locally.
+      - id: terraform_validate
+        name: terraform_validate (remote-backend modules)
+        files: ^aws_infrastructure/
+        exclude: ^aws_infrastructure/01_org_setup/00_bootstrap/
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
