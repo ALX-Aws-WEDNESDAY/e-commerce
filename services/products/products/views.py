@@ -13,8 +13,6 @@ from .serializers import (
     CategorySerializer, CategoryDetailSerializer
 )
 
-
-
 class StandardResultsSetPagination(PageNumberPagination):
     #Standard pagination for list views
     page_size = 20
@@ -47,10 +45,6 @@ class CategoryViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
     
-    def get_queryset(self):
-        import time
-        time.sleep(2)
-        return super().get_queryset()
 
     @action(detail=True, methods=['post'], permission_classes=[IsAdminOrAgent])
     def toggle_active(self, request, pk=None):
@@ -80,9 +74,6 @@ class ProductViewSet(viewsets.ModelViewSet):
 
    
     def get_queryset(self):
-        import time
-        time.sleep(2)
-
         queryset = Product.objects.select_related('category')
 
         auth_data = getattr(self.request, 'auth', None) or {}
@@ -99,12 +90,9 @@ class ProductViewSet(viewsets.ModelViewSet):
             return ProductCreateUpdateSerializer
         return ProductListSerializer
     
-    @method_decorator(cache_page(60 * 60 * 12 , key_prefix="category_list"))
+    @method_decorator(cache_page(60 * 60 * 12 , key_prefix="product_list"))
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
-    
-   
-
 
 
     @action(detail=True, methods=['post'], permission_classes=[IsAdminOrAgent])
