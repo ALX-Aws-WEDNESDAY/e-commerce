@@ -118,21 +118,6 @@ resource "aws_iam_policy" "mgmt_terraform_ops" {
           # Add new account ARNs here as you provision workload and sandbox accounts
         ]
       },
-      # {
-      #   Sid    = "StateBucketAccess"
-      #   Effect = "Allow"
-      #   Action = [
-      #     "s3:ListBucket",
-      #     "s3:GetObject",
-      #     "s3:PutObject",
-      #     "s3:DeleteObject",
-      #     "s3:GetBucketPolicy"
-      #   ]
-      #   Resource = [
-      #     local.state_bucket_arn,
-      #     "${local.state_bucket_arn}/*"
-      #   ]
-      # },
       {
         Sid    = "StateBucketAccess"
         Effect = "Allow"
@@ -299,25 +284,25 @@ resource "aws_iam_policy" "mgmt_terraform_ops" {
         ]
       },
       {
-        Sid = "AWSMCPGrant"
-        "Effect" : "Allow",
-        "Action" : [
+        Sid    = "AWSMCPGrant"
+        Effect = "Allow"
+        Action = [
           "aws-mcp:InvokeMcp",
           "aws-mcp:CallReadOnlyTool",
           "aws-mcp:CallReadWriteTool"
-        ],
-        "Resource" : "*"
+        ]
+        Resource = "*"
       },
-       {
-        Sid = "AccountGrant"
-        "Effect" : "Allow",
-        "Action" : [
+      {
+        Sid    = "AccountGrant"
+        Effect = "Allow"
+        Action = [
           "account:ListRegions",
           "account:GetRegionOptStatus",
-          "account:EnableRegion",
-        ],
-        "Resource" : "*"
-      },
+          "account:EnableRegion"
+        ]
+        Resource = "*"
+      }
     ]
   })
 
