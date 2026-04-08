@@ -26,5 +26,5 @@ HEALTHCHECK CMD curl -f http://localhost:8000/health || exit 1
 
 EXPOSE 8000
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "60", "core.wsgi:application"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "60", "auth_service.wsgi:application"]
 

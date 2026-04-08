@@ -5,6 +5,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from .permissions import IsAdminOrReadOnly, IsAdminOrAgent
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from .models import Product, Category
 from .serializers import (
     ProductListSerializer, ProductDetailSerializer, ProductCreateUpdateSerializer,
@@ -41,6 +43,14 @@ class CategoryViewSet(viewsets.ModelViewSet):
             return CategoryDetailSerializer
         return CategorySerializer
 
+    @method_decorator(cache_page(60 *60*12, key_prefix="category_list"))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+    def get_queryset(self):
+        import time
+        time.sleep(2)
+        return super().get_queryset()
 
     @action(detail=True, methods=['post'], permission_classes=[IsAdminOrAgent])
     def toggle_active(self, request, pk=None):
@@ -70,9 +80,13 @@ class ProductViewSet(viewsets.ModelViewSet):
 
    
     def get_queryset(self):
+        import time
+        time.sleep(2)
+
         queryset = Product.objects.select_related('category')
 
-        roles = self.request.auth.get("roles", []) if self.request.user else []
+        auth_data = getattr(self.request, 'auth', None) or {}
+        roles = auth_data.get('roles', []) if self.request.user and auth_data else []
         if "admin" in roles or "agent" in roles:
             return queryset
         return queryset.filter(status='published')
@@ -84,6 +98,13 @@ class ProductViewSet(viewsets.ModelViewSet):
         elif self.action in ['create', 'update', 'partial_update']:
             return ProductCreateUpdateSerializer
         return ProductListSerializer
+    
+    @method_decorator(cache_page(60 * 60 * 12 , key_prefix="category_list"))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+    
+   
+
 
 
     @action(detail=True, methods=['post'], permission_classes=[IsAdminOrAgent])
