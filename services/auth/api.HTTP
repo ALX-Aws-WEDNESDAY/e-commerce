@@ -1,6 +1,6 @@
 @host = http://localhost:8003
-@access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc1NjYwNDIwLCJpYXQiOjE3NzU2NTY4MjAsImp0aSI6IjA5ZDE0NTc4MDI4NzRkN2NiZmI2NDNhMTliNjQwYzM4IiwidXNlcl9pZCI6NDgsInJvbGVzIjpbImFkbWluIl19.yp84mGNTTPT7nQqulFp3duZ05aZYdzMP5GTJF0o3T_g
-@refresh_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc3NjI2MTYyMCwiaWF0IjoxNzc1NjU2ODIwLCJqdGkiOiI4ODVjYThmYmI4Y2M0NTM5YmMzMGVjODUxYjlhODQzNiIsInVzZXJfaWQiOjQ4LCJyb2xlcyI6WyJhZG1pbiJdfQ.UOfUHK4LTLTw5rv7ExooKZJkB526khU2DIQ87g0mOX4
+@access_token =
+@refresh_token =
 # 1) Register user (public)
 ### User registration
 POST {{host}}/api/users/register/
