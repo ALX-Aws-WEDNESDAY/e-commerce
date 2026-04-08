@@ -1,0 +1,184 @@
+# Product Microservice API Tests
+# Base URL: http://localhost:8000
+# Replace YOUR_JWT_TOKEN with actual JWT token from auth service
+@host = http://localhost:8001
+@access_token = 
+
+@refresh_token = 
+### ============================================================================
+### PRODUCTS ENDPOINTS
+### ============================================================================
+
+### List Products (Public)
+GET {{host}}/api/products/
+Content-Type: application/json
+
+###
+
+### List Products with Filters (Public)
+GET {{host}}/api/products/?status=published&is_in_stock=true&page=1&page_size=10
+Content-Type: application/json
+
+###
+
+### Get Product Details (Public)
+GET {{host}}/api/products/1/
+Content-Type: application/json
+
+###
+
+### Create Product (Admin/Agent Only)
+POST {{host}}/api/products/
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "Gaming Laptop",
+  "description": "High-performance gaming laptop",
+  "price": "1999.99",
+  "cost_price": "1200.00",
+  "category": 1,
+  "quantity_in_stock": 5,
+  "status": "draft"
+}
+
+###
+
+### Update Product (Admin/Agent Only) - Partial Update
+PATCH {{host}}/api/products/1/
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "price": "1899.99",
+  "quantity_in_stock": 10
+}
+
+###
+
+### Update Product (Admin/Agent Only) - Full Update
+PUT {{host}}/api/products/1/
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "Updated Gaming Laptop",
+  "description": "Updated high-performance gaming laptop",
+  "price": "1899.99",
+  "cost_price": "1100.00",
+  "category": 1,
+  "quantity_in_stock": 10,
+  "status": "published"
+}
+
+###
+
+### Delete Product (Admin/Agent Only)
+DELETE {{host}}/api/products/1/
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+###
+
+### Toggle Product Status (Admin/Agent Only)
+POST {{host}}/api/products/2/toggle_status/
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+###
+
+### Update Product Stock (Admin/Agent Only)
+POST {{host}}/api/products/2/update_stock/
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "quantity": 5,
+  "operation": "add"
+}
+
+###
+
+### Admin Dashboard (Admin/Agent Only)
+GET {{{host}}}/api/products/admin_dashboard/
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+###
+
+### Featured Products (Public)
+GET {{host}}/api/products/featured/
+Content-Type: application/json
+
+###
+
+### ============================================================================
+### CATEGORIES ENDPOINTS
+### ============================================================================
+
+### List Categories (Public)
+GET {{host}}/api/categories/
+Content-Type: application/json
+
+###
+
+### List Categories with Filters (Public)
+GET {{host}}/api/categories/?page=1&page_size=10&search=electronics
+Content-Type: application/json
+
+###
+
+### Get Category Details (Public)
+GET {{host}}/api/categories/2/
+Content-Type: application/json
+
+###
+
+### Create Category (Admin/Agent Only)
+POST {{host}}/api/categories/
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "Electronics",
+  "description": "Electronic devices and accessories"
+}
+
+###
+
+### Update Category (Admin/Agent Only) - Partial Update
+PATCH {{host}}/api/categories/1/
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "description": "Updated electronic devices and accessories"
+}
+
+###
+
+### Update Category (Admin/Agent Only) - Full Update
+PUT {{host}}/api/categories/1/
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "name": "Updated Electronics",
+  "description": "Updated electronic devices and accessories"
+}
+
+###
+
+### Delete Category (Admin/Agent Only)
+DELETE {{host}}/api/categories/6/
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+###
+
+### Toggle Category Active Status (Admin/Agent Only)
+POST {{host}}/api/categories/1/toggle_active/
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+###
