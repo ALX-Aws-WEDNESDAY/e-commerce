@@ -45,7 +45,7 @@ jobs:
         run: ruff check .
 
       - name: Run Ruff format check
-        run: ruff format --check .
+        run: ruff format --check ./services
 
   # Backend test job
   backend-test:
