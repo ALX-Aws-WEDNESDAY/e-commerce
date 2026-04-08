@@ -6,64 +6,177 @@ on:
     paths:
       - 'aws_infrastructure/01_org_setup/**'
       - '.github/workflows/terraform.yml'
-      - '.github/workflows/terraform.yml'
   pull_request:
     branches: [ main, dev, staging ]
     paths:
       - 'aws_infrastructure/01_org_setup/**'
       - '.github/workflows/terraform.yml'
-      - '.github/workflows/terraform.yml'
+
+# Reusable step definitions via defaults
+defaults:
+  run:
+    shell: bash
+
+# ── Shared step template (referenced via YAML anchors) ────────────────────────
+# GitHub Actions does not support YAML anchors natively, so the common steps
+# are duplicated across jobs. Each job is kept minimal to avoid drift.
 
 jobs:
-  terraform:
-    name: 'Terraform'
+
+  # ── Stage 1: foundation workspaces ──────────────────────────────────────────
+  # 00_bootstrap uses local state (no S3 backend yet).
+  # 01_org writes the org/terraform.tfstate that every downstream workspace reads.
+  # These two are independent of each other and run in parallel.
+
+  bootstrap:
+    name: 'bootstrap'
+    runs-on: ubuntu-latest
+    # No AWS credentials needed — fmt and validate are purely local checks.
+    # bootstrap must never be planned or applied in CI: it uses local state
+    # and is a one-time manual operation that creates the S3 state bucket.
+    defaults:
+      run:
+        working-directory: aws_infrastructure/01_org_setup/00_bootstrap
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.10.0'
+      - run: terraform fmt -check -recursive
+        # init with no backend so validate can resolve provider schemas
+        # without needing AWS credentials or a real state bucket.
+      - run: terraform init -backend=false
+      - run: terraform validate
+
+  org:
+    name: 'org'
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
-
-    strategy:
-      matrix:
-        path: [
-          'aws_infrastructure/01_org_setup/00_bootstrap',
-          'aws_infrastructure/01_org_setup/01_org',
-          'aws_infrastructure/01_org_setup/02_identity/scps',
-          'aws_infrastructure/01_org_setup/03_security/01_management_iam',
-          'aws_infrastructure/01_org_setup/03_security/02_cloudtrail',
-          'aws_infrastructure/01_org_setup/03_security/03_github_oidc'
-        ]
-
     defaults:
       run:
-        working-directory: ${{ matrix.path }}
-
+        working-directory: aws_infrastructure/01_org_setup/01_org
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
-          # After applying 03_github_oidc, replace this with the
-          # github_actions_role_arn output from terraform output.
-          # Repo: ALX-Aws-WEDNESDAY/e-commerce
-           role-to-assume: ${{ secrets.AWS_GITHUB_OIDC_ROLE_ARN }}
-           aws-region: ${{ secrets.AWS_REGION }}
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+          role-to-assume: ${{ secrets.AWS_GITHUB_OIDC_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: '1.10.0'
+      - run: terraform fmt -check -recursive
+      - run: terraform init
+      - run: terraform validate
+      - run: terraform plan -no-color
+        continue-on-error: true
 
-      - name: Terraform Format
-        run: terraform fmt -check -recursive
+  # ── Stage 2: workspaces that read org remote state ───────────────────────────
+  # scps, management_iam, and cloudtrail all depend on 01_org state being present.
+  # They are independent of each other and run in parallel within this stage.
 
-      - name: Terraform Init
-        run: terraform init
+  scps:
+    name: 'scps'
+    runs-on: ubuntu-latest
+    needs: org
+    permissions:
+      id-token: write
+      contents: read
+    defaults:
+      run:
+        working-directory: aws_infrastructure/01_org_setup/02_identity/scps
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_OIDC_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.10.0'
+      - run: terraform fmt -check -recursive
+      - run: terraform init
+      - run: terraform validate
+      - run: terraform plan -no-color
+        continue-on-error: true
 
-      - name: Terraform Validate
-        run: terraform validate
+  management_iam:
+    name: 'management_iam'
+    runs-on: ubuntu-latest
+    needs: org
+    permissions:
+      id-token: write
+      contents: read
+    defaults:
+      run:
+        working-directory: aws_infrastructure/01_org_setup/03_security/01_management_iam
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_OIDC_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.10.0'
+      - run: terraform fmt -check -recursive
+      - run: terraform init
+      - run: terraform validate
+      - run: terraform plan -no-color
+        continue-on-error: true
 
-      - name: Terraform Plan
-        run: terraform plan -no-color
+  cloudtrail:
+    name: 'cloudtrail'
+    runs-on: ubuntu-latest
+    needs: org
+    permissions:
+      id-token: write
+      contents: read
+    defaults:
+      run:
+        working-directory: aws_infrastructure/01_org_setup/03_security/02_cloudtrail
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_OIDC_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.10.0'
+      - run: terraform fmt -check -recursive
+      - run: terraform init
+      - run: terraform validate
+      - run: terraform plan -no-color
+        continue-on-error: true
+
+  # ── Stage 3: github_oidc ─────────────────────────────────────────────────────
+  # Depends on management_iam because it attaches the EcommerceTerraformOps
+  # policy that management_iam creates. Also inherits the org dependency
+  # transitively through management_iam.
+
+  github_oidc:
+    name: 'github_oidc'
+    runs-on: ubuntu-latest
+    needs: management_iam
+    permissions:
+      id-token: write
+      contents: read
+    defaults:
+      run:
+        working-directory: aws_infrastructure/01_org_setup/03_security/03_github_oidc
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_GITHUB_OIDC_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.10.0'
+      - run: terraform fmt -check -recursive
+      - run: terraform init
+      - run: terraform validate
+      - run: terraform plan -no-color
         continue-on-error: true
