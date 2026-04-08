@@ -13,7 +13,7 @@ on:
 
 # Env block
 env:
-  PYTHON_VERSION: "3.11"
+  PYTHON_VERSION: "3.12.x"
   DATABASE_URL: postgresql://postgres:postgres@localhost:5432/auth_service_test
   REDIS_URL: redis://localhost:6379/0
   SECRET_KEY: test-secret-key
@@ -23,9 +23,9 @@ jobs:
   # Backend lint job
   backend-lint:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./services/auth
+    # defaults:
+    #   run:
+    #     working-directory: ./services/auth
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -51,9 +51,9 @@ jobs:
   backend-test:
     needs: backend-lint
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./services/auth
+    # defaults:
+    #   run:
+    #     working-directory: ./services/auth
     services:
       postgres:
         image: postgres:16-alpine
@@ -129,15 +129,15 @@ jobs:
         with:
           name: backend-coverage
           path: |
-            ./services/auth/coverage
-            ./services/auth/coverage.xml
+            ./services/*/coverage
+            ./services/*/coverage.xml
           retention-days: 7
 
       - name: Upload test results artifact
         uses: actions/upload-artifact@v4
         with:
           name: backend-test-results
-          path: ./services/auth/test-results
+          path: ./services/*/test-results
           retention-days: 7
 
       - name: Check coverage threshold
@@ -147,9 +147,9 @@ jobs:
   backend-migrations:
     needs: backend-lint
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./services/auth
+    # defaults:
+    #   run:
+    #     working-directory: ./services/auth
     services:
       postgres:
         image: postgres:16-alpine
