@@ -3,7 +3,7 @@
 # ============================================================
 
 provider "aws" {
-  region  = var.aws_region
+  region = var.aws_region
 
   # default_tags are stamped on every resource Terraform creates
   # in this workspace — no need to repeat them per resource.

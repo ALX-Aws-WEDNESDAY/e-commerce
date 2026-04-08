@@ -180,7 +180,7 @@ resource "aws_organizations_account" "log_archive" {
   lifecycle {
     # role_name cannot be read back from the API after creation.
     # Ignoring prevents a perpetual diff on every plan.
-    ignore_changes = [role_name]
+    ignore_changes  = [role_name]
     prevent_destroy = true
   }
 }
@@ -209,7 +209,7 @@ resource "aws_organizations_account" "security_tooling" {
   }
 
   lifecycle {
-    ignore_changes = [role_name]
+    ignore_changes  = [role_name]
     prevent_destroy = true
   }
 }
@@ -238,7 +238,7 @@ resource "aws_organizations_account" "shared_services" {
   }
 
   lifecycle {
-    ignore_changes = [role_name]
+    ignore_changes  = [role_name]
     prevent_destroy = true
   }
 }
@@ -255,25 +255,25 @@ resource "aws_organizations_account" "shared_services" {
 # Any future accounts added to this workspace should get the same block.
 
 resource "aws_account_region" "log_archive_af_south_1" {
-  provider   = aws.log_archive
+  provider    = aws.log_archive
   region_name = var.aws_region
-  enabled    = true
+  enabled     = true
 
   depends_on = [aws_organizations_account.log_archive]
 }
 
 resource "aws_account_region" "security_tooling_af_south_1" {
-  provider   = aws.security_tooling
+  provider    = aws.security_tooling
   region_name = var.aws_region
-  enabled    = true
+  enabled     = true
 
   depends_on = [aws_organizations_account.security_tooling]
 }
 
 resource "aws_account_region" "shared_services_af_south_1" {
-  provider   = aws.shared_services
+  provider    = aws.shared_services
   region_name = var.aws_region
-  enabled    = true
+  enabled     = true
 
   depends_on = [aws_organizations_account.shared_services]
 }

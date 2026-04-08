@@ -90,8 +90,8 @@ resource "aws_iam_role" "github_actions" {
   })
 
   tags = {
-    "iam:purpose"    = "github-actions-ci"
-    "iam:repo"       = "${var.github_org}/${var.github_repo}"
+    "iam:purpose"     = "github-actions-ci"
+    "iam:repo"        = "${var.github_org}/${var.github_repo}"
     "iam:auth-method" = "oidc"
   }
 }

@@ -31,10 +31,10 @@ resource "aws_organizations_policy" "deny_leave_org" {
   content = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Sid       = "DenyLeaveOrganization"
-      Effect    = "Deny"
-      Action    = "organizations:LeaveOrganization"
-      Resource  = "*"
+      Sid      = "DenyLeaveOrganization"
+      Effect   = "Deny"
+      Action   = "organizations:LeaveOrganization"
+      Resource = "*"
     }]
   })
 
@@ -142,9 +142,9 @@ resource "aws_organizations_policy" "deny_root_user" {
   content = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Sid    = "DenyRootUser"
-      Effect = "Deny"
-      Action = "*"
+      Sid      = "DenyRootUser"
+      Effect   = "Deny"
+      Action   = "*"
       Resource = "*"
       Condition = {
         StringLike = {
