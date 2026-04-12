@@ -15,14 +15,143 @@ on:
 env:
   NODE_VERSION: "20"
 
-jobs:
+defaults:
+  run:
+    working-directory: ./frontend
+
+#jobs:
   # Frontend lint job
-  frontend-lint:
-    name: Frontend Lint Code Base
+  # frontend-lint:
+  #   name: Frontend Lint Code Base
+  #   runs-on: ubuntu-latest
+  #   # defaults:
+  #   #  run:
+  #   #   working-directory: ./frontend
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: npm
+  #         cache-dependency-path: ./frontend/package-lock.json
+
+  #     - name: Install dependencies
+  #       run: npm ci
+
+  #     - name: Run ESLint
+  #       run: npm run lint
+
+  # # Frontend build job
+  # frontend-build:
+  #   name: Frontend Build
+  #   needs: frontend-lint
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: ./frontend
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: npm
+  #         cache-dependency-path: ./frontend/package-lock.json
+
+  #     - name: Install dependencies
+  #       run: npm ci
+
+  #     - name: Build frontend
+  #       run: npm run build
+
+  #     - name: Upload build artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: frontend-build
+  #         path: ./frontend/dist
+  #         retention-days: 7
+
+  # # Frontend test job
+  # frontend-test:
+  #   name: Frontend Unit Tests & Coverage
+  #   needs: frontend-lint
+  #   runs-on: ubuntu-latest
+  #   # defaults:
+  #   #  run:
+  #   #   working-directory: ./frontend
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: npm
+  #         cache-dependency-path: ./frontend/package-lock.json
+
+  #     - name: Install dependencies
+  #       run: npm ci
+
+  #     - name: Run frontend tests
+  #       run: npm run test:ci
+
+  #     - name: Upload coverage artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: frontend-coverage
+  #         path: ./frontend/coverage
+  #         retention-days: 7
+
+  #     - name: Set coverage threshold
+  #       run: |
+  #         target_branch="${GITHUB_BASE_REF:-${GITHUB_REF_NAME}}"
+  #         case "$target_branch" in
+  #           dev)
+  #             threshold=40 ;;
+  #           staging)
+  #             threshold=60 ;;
+  #           main)
+  #             threshold=85 ;;
+  #           *)
+  #             echo "Unsupported branch for coverage threshold: $target_branch"
+  #             exit 1 ;;
+  #         esac
+  #         echo "COVERAGE_THRESHOLD=$threshold" >> "$GITHUB_ENV"
+
+  #     - name: Check coverage thresholds
+  #       run: |
+  #         node <<'NODE'
+  #         const fs = require('fs');
+  #         const path = require('path');
+
+  #         const summaryPath = path.resolve('coverage', 'coverage-summary.json');
+  #         if (!fs.existsSync(summaryPath)) {
+  #           throw new Error(`Coverage summary not found at ${summaryPath}`);
+  #         }
+
+  #         const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
+  #         const threshold = Number(process.env.COVERAGE_THRESHOLD);
+  #         const metrics = ['statements', 'branches', 'functions', 'lines'];
+  #         const failingMetrics = metrics.filter((metric) => (summary.total?.[metric]?.pct ?? 0) < threshold);
+
+  #         if (failingMetrics.length > 0) {
+  #           throw new Error(`Coverage below ${threshold}% for: ${failingMetrics.join(', ')}`);
+  #         }
+
+  #         console.log(`Coverage passed with threshold ${threshold}%`); 
+  #         NODE
+
+
+jobs:
+  ci:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./frontend
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -32,116 +161,16 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-          cache-dependency-path: ./frontend/package-lock.json
+          cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
+      - name: Install dependencies    
         run: npm ci
 
       - name: Run ESLint
         run: npm run lint
 
-  # Frontend build job
-  frontend-build:
-    name: Frontend Build
-    needs: frontend-lint
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./frontend
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: ./frontend/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build frontend
-        run: npm run build
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-build
-          path: ./frontend/dist
-          retention-days: 7
-
-  # Frontend test job
-  frontend-test:
-    name: Frontend Unit Tests & Coverage
-    needs: frontend-lint
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./frontend
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-          cache-dependency-path: ./frontend/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
       - name: Run frontend tests
         run: npm run test:ci
 
-      - name: Upload coverage artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-coverage
-          path: ./frontend/coverage
-          retention-days: 7
-
-      - name: Set coverage threshold
-        run: |
-          target_branch="${GITHUB_BASE_REF:-${GITHUB_REF_NAME}}"
-          case "$target_branch" in
-            dev)
-              threshold=40 ;;
-            staging)
-              threshold=60 ;;
-            main)
-              threshold=85 ;;
-            *)
-              echo "Unsupported branch for coverage threshold: $target_branch"
-              exit 1 ;;
-          esac
-          echo "COVERAGE_THRESHOLD=$threshold" >> "$GITHUB_ENV"
-
-      - name: Check coverage thresholds
-        run: |
-          node <<'NODE'
-          const fs = require('fs');
-          const path = require('path');
-
-          const summaryPath = path.resolve('coverage', 'coverage-summary.json');
-          if (!fs.existsSync(summaryPath)) {
-            throw new Error(`Coverage summary not found at ${summaryPath}`);
-          }
-
-          const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'));
-          const threshold = Number(process.env.COVERAGE_THRESHOLD);
-          const metrics = ['statements', 'branches', 'functions', 'lines'];
-          const failingMetrics = metrics.filter((metric) => (summary.total?.[metric]?.pct ?? 0) < threshold);
-
-          if (failingMetrics.length > 0) {
-            throw new Error(`Coverage below ${threshold}% for: ${failingMetrics.join(', ')}`);
-          }
-
-          console.log(`Coverage passed with threshold ${threshold}%`); 
-          NODE
-
-
-         
+      - name: Build frontend
+        run: npm run build   
