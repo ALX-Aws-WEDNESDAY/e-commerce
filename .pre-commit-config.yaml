@@ -5,27 +5,32 @@ repos:
       - id: ruff
         name: ruff lint
         args: [--fix, --exit-non-zero-on-fix]
+        files: ^services/
       - id: ruff-format
         name: ruff format
+        files: ^services/
 
-  # - repo: https://github.com/pre-commit/mirrors-mypy
-  #   rev: v1.19.1
-  #   hooks:
-  #     - id: mypy
-  #       name: mypy type check
-  #       additional_dependencies:
-  #         - django-stubs
-  #         - djangorestframework-stubs
-  #         - typing_extensions
-  #       args: [--config-file=services/auth/pyproject.toml]
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.19.1
+    hooks:
+      - id: mypy
+        name: mypy type check
+        files: ^services/
+        additional_dependencies:
+          - django-stubs
+          - djangorestframework-stubs
+          - typing_extensions
+        args: [--config-file=services/auth/pyproject.toml]
 
   - repo: https://github.com/sqlfluff/sqlfluff
     rev: 4.0.4
     hooks:
       - id: sqlfluff-lint
+        files: ^services/
         args: [--dialect, postgres]
         additional_dependencies: ['dbt-postgres==1.10.0', 'sqlfluff-templater-dbt']
       - id: sqlfluff-fix
+        files: ^services/
         args: [--dialect, postgres]
         additional_dependencies: ['dbt-postgres==1.10.0', 'sqlfluff-templater-dbt']
 
@@ -41,7 +46,7 @@ repos:
         name: terraform_validate (bootstrap)
         files: ^aws_infrastructure/01_org_setup/00_bootstrap/
         args:
-          - --args=-backend=false
+          - --tf-init-args=-backend=false
 
       # All other modules use a remote S3 backend. validate runs after
       # terraform init which requires AWS credentials to be active locally.
@@ -60,29 +65,31 @@ repos:
       - id: check-merge-conflict
       - id: debug-statements
         name: no debug statements
+        files: ^services/
 
-  # # Uncomment only if working on the front-end
-  # - repo: https://github.com/pre-commit/mirrors-eslint
-  #   rev: v10.1.0
-  #   hooks:
-  #     - id: eslint
-  #       additional_dependencies:
-  #         - eslint@9.39.0
-  #         - eslint-plugin-react-hooks@7.0.1
-  #         - eslint-plugin-react-refresh@0.5.2
-  #       files: ^frontend/.*\.(js|ts|jsx|tsx)$
-  #       args: [--config, frontend/eslint.config.js, --ext, '.js,.jsx,.ts,.tsx', 'frontend']
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v10.1.0
+    hooks:
+      - id: eslint
+        additional_dependencies:
+          - eslint@9.39.0
+          - eslint-plugin-react-hooks@7.0.1
+          - eslint-plugin-react-refresh@0.5.2
+        files: ^frontend/.*\.(js|ts|jsx|tsx)$
+        args: [--config, frontend/eslint.config.js, --ext, '.js,.jsx,.ts,.tsx', 'frontend']
 
-  # - repo: local
-  #   hooks:
-  #     - id: frontend-jest
-  #       name: frontend jest tests
-  #       entry: bash -c "cd frontend && npm ci && npm run test:ci"
-  #       language: system
-  #       pass_filenames: false
+  - repo: local
+    hooks:
+      - id: frontend-jest
+        name: frontend jest tests
+        entry: bash -c "cd frontend && npm ci && npm run test:ci"
+        language: system
+        pass_filenames: false
+        files: ^frontend/
 
-  #     - id: backend-migrations
-  #       name: backend migration check
-  #       entry: bash -c "cd services/auth && python manage.py makemigrations --dry-run --check"
-  #       language: system
-  #       pass_filenames: false
+      - id: backend-migrations
+        name: backend migration check
+        entry: bash -c "cd services/auth && python manage.py makemigrations --dry-run --check"
+        language: system
+        pass_filenames: false
+        files: ^services/auth/
