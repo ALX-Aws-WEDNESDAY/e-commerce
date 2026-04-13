@@ -2,6 +2,16 @@
 
 A robust, full-stack Serverless E-commerce Application built with React/TypeScript on the Frontend and Django REST Framework on the Backend.
 
+## Getting Started
+
+After cloning, run the following to install pre-commit hooks (required before making any commits):
+
+```bash
+make install
+```
+
+This installs the pre-commit hooks defined in `.pre-commit-config.yaml`. Commits will be blocked until this is run.
+
 ## Recent Upgrades (March 2026)
 
 ### Frontend UI/UX Enhancements
