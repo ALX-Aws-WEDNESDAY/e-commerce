@@ -3,42 +3,51 @@
 ## Introduction
 
 <details>
+
 <pre style="white-space: pre-wrap; word-wrap: break-word; font-family: 'Courier New', Courier, monospace; font-size: 0.750em;">
 
 ```txt
-01_org_setup
-  ├── 00_bootstrap/             # Run once to create the S3 state bucket
-  │   ├── main.tf
-  │   └── variables.tf
-  ├── 01_org/                   # AWS Organization, OUs, and backbone accounts
-  │   ├── backend.tf
-  │   ├── delegated_admins.tf
-  │   ├── main.tf
-  │   ├── outputs.tf
-  │   ├── provider.tf
-  │   ├── variables.tf
-  │   └── versions.tf
-  ├── 02_identity/
-  │   └── scps/                 # Root-level SCPs
-  │       ├── backend.tf
-  │       ├── main.tf
-  │       ├── provider.tf
-  │       ├── variables.tf
-  │       └── versions.tf
-  ├── 03_security/
-  │   ├── 02_cloudtrail/           # Org-wide CloudTrail trail
-  │   │   ├── backend.tf
-  │   │   ├── main.tf
-  │   │   ├── provider.tf
-  │   │   ├── variables.tf
-  │   │   └── versions.tf
-  │   └── 01_management_iam/       # Management account IAM hardening
-  │       ├── backend.tf
-  │       ├── main.tf
-  │       ├── provider.tf
-  │       ├── variables.tf
-  │       └── versions.tf
-  └── README.md
+aws_infrastructure
+└── 01_org_setup
+  ├── 00_bootstrap                  # Run once to create the S3 state bucket
+    │   ├── main.tf
+    │   └── variables.tf
+    ├── 01_org                      # AWS Organization, OUs, and backbone accounts
+    │   ├── backend.tf
+    │   ├── delegated_admins.tf
+    │   ├── main.tf
+    │   ├── outputs.tf
+    │   ├── provider.tf
+    │   ├── variables.tf
+    │   └── versions.tf
+    ├── 02_identity
+    │   └── scps                    # Root-level SCPs
+    │       ├── backend.tf
+    │       ├── main.tf
+    │       ├── provider.tf
+    │       ├── variables.tf
+    │       └── versions.tf
+    ├── 03_security
+    │   ├── 01_management_iam       # Management account IAM hardening
+    │   │   ├── backend.tf
+    │   │   ├── main.tf
+    │   │   ├── provider.tf
+    │   │   ├── variables.tf
+    │   │   └── versions.tf
+    │   ├── 02_cloudtrail           # Org-wide CloudTrail trail
+    │   │   ├── backend.tf
+    │   │   ├── main.tf
+    │   │   ├── provider.tf
+    │   │   ├── variables.tf
+    │   │   └── versions.tf
+    │   └── 03_github_oidc         # GitHub OpenID Connect
+    │       ├── backend.tf
+    │       ├── main.tf
+    │       ├── outputs.tf
+    │       ├── provider.tf
+    │       ├── variables.tf
+    │       └── versions.tf
+    └── README.md
 ```
 
 </details>
