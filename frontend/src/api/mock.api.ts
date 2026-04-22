@@ -2,7 +2,8 @@
 import { MOCK_PRODUCTS } from '@/mocks/data/products.data'
 import { MOCK_CATEGORIES } from '@/mocks/data/categories.data'
 import { MOCK_ORDERS } from '@/mocks/data/orders.data'
-import type { Product, ProductsResponse, Category, ProductFilters, Cart, CartItem, User, LoginPayload, RegisterPayload, Order, CreateOrderPayload } from '@/types'
+import { getReviewsStore, persistReviews } from '@/mocks/data/reviews.data'
+import type { Product, ProductsResponse, Category, ProductFilters, Cart, CartItem, User, LoginPayload, RegisterPayload, Order, CreateOrderPayload, Review, CreateReviewPayload, UpdateReviewPayload } from '@/types'
 
 // Mock cart state
 const storedCart = localStorage.getItem('mock_cart')
@@ -214,5 +215,50 @@ export const mockApi = {
       throw new Error('Order not found')
     }
     return order
-  }
+  },
+
+  // Reviews methods
+  getReviews: async (productId: number): Promise<Review[]> => {
+    await mockApi.delay()
+    return getReviewsStore().filter((r) => r.product_id === productId)
+  },
+
+  createReview: async (payload: CreateReviewPayload, authorName: string): Promise<Review> => {
+    await mockApi.delay()
+    const store = getReviewsStore()
+    const duplicate = store.find(
+      (r) => r.product_id === payload.product_id && r.author_name === authorName
+    )
+    if (duplicate) {
+      throw new Error('You have already reviewed this product')
+    }
+    const newId = store.length > 0 ? Math.max(...store.map((r) => r.id)) + 1 : 1
+    const now = new Date().toISOString()
+    const review: Review = {
+      id: newId,
+      product_id: payload.product_id,
+      author_name: authorName,
+      rating: payload.rating,
+      body: payload.body ?? '',
+      created_at: now,
+      updated_at: now,
+    }
+    store.push(review)
+    persistReviews()
+    return review
+  },
+
+  updateReview: async (reviewId: number, payload: UpdateReviewPayload): Promise<Review> => {
+    await mockApi.delay()
+    const store = getReviewsStore()
+    const review = store.find((r) => r.id === reviewId)
+    if (!review) {
+      throw new Error('Review not found')
+    }
+    review.rating = payload.rating
+    review.body = payload.body ?? review.body
+    review.updated_at = new Date().toISOString()
+    persistReviews()
+    return review
+  },
 }

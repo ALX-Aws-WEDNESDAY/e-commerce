@@ -7,12 +7,12 @@ import type { LoginPayload, RegisterPayload } from '@/types'
 
 export function useMe() {
   const setUser = useAuthStore((s) => s.setUser)
-  const token = localStorage.getItem('access_token')
+  const accessToken = useAuthStore((s) => s.accessToken)
 
   return useQuery({
     queryKey: ['me'],
     queryFn: async () => {
-      if (!token) {
+      if (!accessToken) {
         setUser(null)
         return null
       }
@@ -25,7 +25,7 @@ export function useMe() {
         throw error
       }
     },
-    enabled: !!token,
+    enabled: !!accessToken,
     retry: false,
   })
 }

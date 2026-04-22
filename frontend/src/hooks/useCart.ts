@@ -59,7 +59,10 @@ export function useRemoveCartItem() {
   const setCart = useCartStore((s) => s.setCart)
 
   return useMutation({
-    mutationFn: (itemId: number) => cartApi.removeItem(itemId),
+    mutationFn: async (itemId: number) => {
+      await cartApi.removeItem(itemId)
+      return cartApi.get() // Fetch updated cart
+    },
     onSuccess: (cart) => {
       setCart(cart)
       queryClient.setQueryData(cartKeys.cart, cart)

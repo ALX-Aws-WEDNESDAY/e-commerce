@@ -1,17 +1,28 @@
 import React from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { useProduct } from '@/hooks/useProducts'
 import { useAddToCart } from '@/hooks/useCart'
+import { useReviews } from '@/hooks/useReviews'
+import { useAuthStore } from '@/store/auth.store'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { StarRating } from '@/components/ui/StarRating'
 import { formatPrice, formatDiscount } from '@/utils/formatPrice'
 import { Spinner } from '@/components/ui/Spinner'
+import { ReviewList } from '@/components/products/ReviewList'
+import { ReviewForm } from '@/components/products/ReviewForm'
 
 export const ProductDetailPage: React.FC = () => {
-  const { slug } = useParams<{ slug: string }>()
-  const { data: product, isLoading, error } = useProduct(slug || '')
+  const { id } = useParams<{ id: string }>()
+  const productId = parseInt(id || '0', 10)
+  const { data: product, isLoading, error } = useProduct(productId)
   const addToCart = useAddToCart()
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const user = useAuthStore((s) => s.user)
+  const { data: reviews = [] } = useReviews(product?.id ?? 0)
+  const userExistingReview = user
+    ? reviews.find((r) => r.author_name === `${user.first_name} ${user.last_name}`)
+    : undefined
 
   const handleAddToCart = (productId: number) => {
     addToCart.mutate({ productId, quantity: 1 })
@@ -104,6 +115,27 @@ export const ProductDetailPage: React.FC = () => {
               Save for Later
             </Button>
           </div>
+        </div>
+      </div>
+
+      {/* Reviews */}
+      <div className="mt-12">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6">Reviews</h2>
+        <ReviewList productId={product.id} />
+        <div className="mt-8">
+          {isAuthenticated ? (
+            <>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                {userExistingReview ? 'Update Your Review' : 'Leave a Review'}
+              </h3>
+              <ReviewForm productId={product.id} existingReview={userExistingReview} />
+            </>
+          ) : (
+            <p className="text-gray-600 dark:text-gray-400">
+              <Link to="/login" className="text-brand-600 hover:underline font-medium">Sign in</Link>
+              {' '}to leave a review
+            </p>
+          )}
         </div>
       </div>
     </div>

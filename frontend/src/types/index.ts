@@ -124,3 +124,25 @@ export type ApiError = {
   message: string
   errors?: Record<string, string[]>
 }
+
+// ── Reviews ───────────────────────────────────────────────────────────────────
+export type Review = {
+  id: number
+  product_id: number
+  author_name: string
+  rating: number          // 1–5 integer
+  body: string
+  created_at: string      // ISO 8601
+  updated_at: string      // ISO 8601
+}
+
+export type CreateReviewPayload = {
+  product_id: number
+  rating: number
+  body?: string
+}
+
+export type UpdateReviewPayload = {
+  rating: number
+  body?: string
+}

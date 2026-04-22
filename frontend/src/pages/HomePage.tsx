@@ -103,7 +103,7 @@ export const HomePage: React.FC = () => {
               {featuredProducts?.map((product) => (
                 <div key={product.id} className="bg-white dark:bg-secondary-800 border border-transparent dark:border-secondary-700 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                   <div className="relative">
-                    <Link to={`/products/${product.slug}`}>
+                    <Link to={`/products/${product.id}`}>
                       <img
                         src={product.images[0]?.url}
                         alt={product.name}
@@ -117,7 +117,7 @@ export const HomePage: React.FC = () => {
                     )}
                   </div>
                   <div className="p-4">
-                    <Link to={`/products/${product.slug}`}>
+                    <Link to={`/products/${product.id}`}>
                       <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-1 line-clamp-2 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
                         {product.name}
                       </h3>
