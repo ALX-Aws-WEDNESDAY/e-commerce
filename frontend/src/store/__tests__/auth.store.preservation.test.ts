@@ -253,8 +253,10 @@ describe('Property 3.5 — 401 response triggers redirect to /login', () => {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const responseInterceptorManager = (apiClient.interceptors.response as any)
-    const rejectedFns: Array<(e: unknown) => unknown> = []
-    responseInterceptorManager.forEach((h: { rejected?: (e: unknown) => unknown }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rejectedFns: Array<(e: any) => any> = []
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    responseInterceptorManager.forEach((h: { rejected?: (e: any) => any }) => {
       if (h.rejected) rejectedFns.push(h.rejected)
     })
 
@@ -283,8 +285,10 @@ describe('Property 3.5 — 401 response triggers redirect to /login', () => {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const responseInterceptorManager = (apiClient.interceptors.response as any)
-    const rejectedFns: Array<(e: unknown) => unknown> = []
-    responseInterceptorManager.forEach((h: { rejected?: (e: unknown) => unknown }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rejectedFns: Array<(e: any) => any> = []
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    responseInterceptorManager.forEach((h: { rejected?: (e: any) => any }) => {
       if (h.rejected) rejectedFns.push(h.rejected)
     })
 
@@ -293,7 +297,9 @@ describe('Property 3.5 — 401 response triggers redirect to /login', () => {
       const error = { response: { status } }
       // Run all interceptors — none should redirect for non-401 errors
       for (const fn of rejectedFns) {
-        await fn(error).catch(() => {})
+        await fn(error).catch(() => {
+          // Intentionally empty - we're testing that no redirect happens
+        })
       }
       expect(locationMock.href, `status ${status} should not redirect`).toBe('')
     }
