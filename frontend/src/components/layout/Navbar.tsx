@@ -35,13 +35,22 @@ export const Navbar: React.FC = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/products" className="text-gray-700 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 font-medium transition-colors">
+            <Link
+              to="/products"
+              className="text-gray-700 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 font-medium transition-colors"
+            >
               Products
             </Link>
-            <Link to="/categories" className="text-gray-700 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 font-medium transition-colors">
+            <Link
+              to="/categories"
+              className="text-gray-700 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 font-medium transition-colors"
+            >
               Categories
             </Link>
-            <Link to="/about" className="text-gray-700 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 font-medium transition-colors">
+            <Link
+              to="/about"
+              className="text-gray-700 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 font-medium transition-colors"
+            >
               About
             </Link>
           </div>
@@ -51,16 +60,22 @@ export const Navbar: React.FC = () => {
             <button className="p-2 text-gray-700 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
               <Search className="h-5 w-5" />
             </button>
-            
-            <button 
+
+            <button
               onClick={cycleTheme}
               className="p-2 text-gray-700 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 transition-colors focus:outline-none"
               title={`Current theme: ${theme}`}
             >
-              {theme === 'light' ? <Sun className="h-5 w-5" /> : theme === 'dark' ? <Moon className="h-5 w-5" /> : <Monitor className="h-5 w-5" />}
+              {theme === 'light' ? (
+                <Sun className="h-5 w-5" />
+              ) : theme === 'dark' ? (
+                <Moon className="h-5 w-5" />
+              ) : (
+                <Monitor className="h-5 w-5" />
+              )}
             </button>
-            
-            <button 
+
+            <button
               onClick={openCart}
               className="relative p-2 text-gray-700 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
             >
@@ -74,15 +89,24 @@ export const Navbar: React.FC = () => {
 
             {isAuthenticated ? (
               <div className="flex items-center space-x-3">
-                <span className="text-sm text-gray-700 dark:text-gray-300">Welcome, {user?.first_name}</span>
-                <Button variant="ghost" size="sm" onClick={handleLogout} className="dark:text-gray-300 dark:hover:text-white dark:hover:bg-secondary-800">
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  Welcome, {user?.first_name}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="dark:text-gray-300 dark:hover:text-white dark:hover:bg-secondary-800"
+                >
                   Logout
                 </Button>
               </div>
             ) : (
               <div className="flex items-center space-x-3">
                 <Link to="/login">
-                  <Button variant="ghost" size="sm">Login</Button>
+                  <Button variant="ghost" size="sm">
+                    Login
+                  </Button>
                 </Link>
                 <Link to="/register">
                   <Button size="sm">Register</Button>
@@ -105,43 +129,49 @@ export const Navbar: React.FC = () => {
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
           <div className="md:hidden py-4 space-y-4 bg-white dark:bg-secondary-900 border-t dark:border-secondary-800">
-            <Link 
-              to="/products" 
+            <Link
+              to="/products"
               className="block text-gray-700 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 font-medium"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Products
             </Link>
-            <Link 
-              to="/categories" 
+            <Link
+              to="/categories"
               className="block text-gray-700 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 font-medium"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Categories
             </Link>
-            <Link 
-              to="/about" 
+            <Link
+              to="/about"
               className="block text-gray-700 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 font-medium"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               About
             </Link>
-            
+
             <div className="flex items-center justify-between pt-4 border-t dark:border-secondary-800">
               <div className="flex items-center space-x-4">
                 <button className="p-2 text-gray-700 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400">
                   <Search className="h-5 w-5" />
                 </button>
-                
-                <button 
+
+                <button
                   onClick={cycleTheme}
                   className="p-2 text-gray-700 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400 focus:outline-none"
                   title={`Current theme: ${theme}`}
                 >
-                  {theme === 'light' ? <Sun className="h-5 w-5" /> : theme === 'dark' ? <Moon className="h-5 w-5" /> : <Monitor className="h-5 w-5" />}
+                  {theme === 'light' ? (
+                    <Sun className="h-5 w-5" />
+                  ) : theme === 'dark' ? (
+                    <Moon className="h-5 w-5" />
+                  ) : (
+                    <Monitor className="h-5 w-5" />
+                  )}
                 </button>
-                
-                <button 
+
+                <button
                   onClick={openCart}
                   className="relative p-2 text-gray-700 dark:text-gray-300 hover:text-brand-600 dark:hover:text-brand-400"
                 >
@@ -156,15 +186,24 @@ export const Navbar: React.FC = () => {
 
               {isAuthenticated ? (
                 <div className="flex flex-col space-y-2">
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Welcome, {user?.first_name}</span>
-                  <Button variant="ghost" size="sm" onClick={handleLogout} className="dark:text-gray-300 dark:hover:text-white dark:hover:bg-secondary-800">
+                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                    Welcome, {user?.first_name}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleLogout}
+                    className="dark:text-gray-300 dark:hover:text-white dark:hover:bg-secondary-800"
+                  >
                     Logout
                   </Button>
                 </div>
               ) : (
                 <div className="flex flex-col space-y-2">
                   <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
-                    <Button variant="ghost" size="sm">Login</Button>
+                    <Button variant="ghost" size="sm">
+                      Login
+                    </Button>
                   </Link>
                   <Link to="/register" onClick={() => setIsMobileMenuOpen(false)}>
                     <Button size="sm">Register</Button>

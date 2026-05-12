@@ -34,9 +34,7 @@ describe('ErrorScreen — heading and body text per variant', () => {
     render(<ErrorScreen variant="not-found" />)
 
     expect(screen.getByRole('heading', { name: /page not found/i })).toBeInTheDocument()
-    expect(
-      screen.getByText(/the page you're looking for doesn't exist\./i)
-    ).toBeInTheDocument()
+    expect(screen.getByText(/the page you're looking for doesn't exist\./i)).toBeInTheDocument()
   })
 
   it('server-error: renders "Something went wrong" heading and correct body', () => {
@@ -64,7 +62,7 @@ describe('ErrorScreen — heading and body text per variant', () => {
     render(<ErrorScreen variant="service-unavailable" />)
 
     expect(
-      screen.getByRole('heading', { name: /service temporarily unavailable/i })
+      screen.getByRole('heading', { name: /service temporarily unavailable/i }),
     ).toBeInTheDocument()
     expect(screen.getByText(/this service is temporarily unavailable\./i)).toBeInTheDocument()
   })
@@ -91,25 +89,19 @@ describe('ErrorScreen — role="alert" on root element', () => {
 // ── correlationId visibility ──────────────────────────────────────────────────
 
 describe('ErrorScreen — correlationId visibility', () => {
-  it.each(ALL_VARIANTS)(
-    '%s: correlationId is visible in the DOM when provided',
-    (variant) => {
-      const correlationId = 'abc-123-def-456'
-      render(<ErrorScreen variant={variant} correlationId={correlationId} />)
+  it.each(ALL_VARIANTS)('%s: correlationId is visible in the DOM when provided', (variant) => {
+    const correlationId = 'abc-123-def-456'
+    render(<ErrorScreen variant={variant} correlationId={correlationId} />)
 
-      expect(screen.getByText(correlationId)).toBeInTheDocument()
-    }
-  )
+    expect(screen.getByText(correlationId)).toBeInTheDocument()
+  })
 
-  it.each(ALL_VARIANTS)(
-    '%s: correlationId is NOT rendered when omitted',
-    (variant) => {
-      render(<ErrorScreen variant={variant} />)
+  it.each(ALL_VARIANTS)('%s: correlationId is NOT rendered when omitted', (variant) => {
+    render(<ErrorScreen variant={variant} />)
 
-      // The "Reference ID:" label should not appear when no correlationId is given
-      expect(screen.queryByText(/reference id/i)).not.toBeInTheDocument()
-    }
-  )
+    // The "Reference ID:" label should not appear when no correlationId is given
+    expect(screen.queryByText(/reference id/i)).not.toBeInTheDocument()
+  })
 })
 
 // ── console.error on mount ────────────────────────────────────────────────────
@@ -166,7 +158,7 @@ describe('ErrorScreen — console.error on mount', () => {
       render(<ErrorScreen variant={variant} error={error} />)
 
       expect(errorSpy).toHaveBeenCalledOnce()
-    }
+    },
   )
 })
 
@@ -255,22 +247,23 @@ describe('ErrorScreen — property-based tests', () => {
     const retryAfterArb = fc.option(fc.nat({ max: 60_000 }), { nil: undefined })
 
     fc.assert(
-      fc.property(variantArb, correlationIdArb, retryAfterArb, (variant, correlationId, retryAfter) => {
-        const { unmount } = render(
-          <ErrorScreen
-            variant={variant}
-            correlationId={correlationId}
-            retryAfter={retryAfter}
-          />
-        )
+      fc.property(
+        variantArb,
+        correlationIdArb,
+        retryAfterArb,
+        (variant, correlationId, retryAfter) => {
+          const { unmount } = render(
+            <ErrorScreen variant={variant} correlationId={correlationId} retryAfter={retryAfter} />,
+          )
 
-        const alertEl = screen.getByRole('alert')
-        const hasAlert = alertEl !== null && alertEl !== undefined
+          const alertEl = screen.getByRole('alert')
+          const hasAlert = alertEl !== null && alertEl !== undefined
 
-        unmount()
-        return hasAlert
-      }),
-      { numRuns: 100 }
+          unmount()
+          return hasAlert
+        },
+      ),
+      { numRuns: 100 },
     )
   })
 
@@ -286,9 +279,7 @@ describe('ErrorScreen — property-based tests', () => {
 
     fc.assert(
       fc.property(variantArb, correlationIdArb, (variant, correlationId) => {
-        const { unmount } = render(
-          <ErrorScreen variant={variant} correlationId={correlationId} />
-        )
+        const { unmount } = render(<ErrorScreen variant={variant} correlationId={correlationId} />)
 
         const el = screen.queryByText(correlationId)
         const isVisible = el !== null
@@ -296,7 +287,7 @@ describe('ErrorScreen — property-based tests', () => {
         unmount()
         return isVisible
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     )
   })
 })

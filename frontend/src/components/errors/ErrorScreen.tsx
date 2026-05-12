@@ -67,7 +67,8 @@ export function ErrorScreen({
   const config = variantConfig[variant]
   const retryAfterSeconds = retryAfter !== undefined ? Math.ceil(retryAfter / 1000) : undefined
   const bodyText = config.body(retryAfterSeconds)
-  const isCoolingDown = variant === 'service-unavailable' && retryAfter !== undefined && retryAfter > 0
+  const isCoolingDown =
+    variant === 'service-unavailable' && retryAfter !== undefined && retryAfter > 0
 
   const renderAction = () => {
     switch (variant) {
@@ -78,24 +79,16 @@ export function ErrorScreen({
             className={cn(
               'inline-flex items-center justify-center rounded-lg font-medium transition-colors',
               'h-10 px-4 text-sm',
-              'bg-brand-600 text-white hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2'
+              'bg-brand-600 text-white hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2',
             )}
           >
             Go to home
           </a>
         )
       case 'server-error':
-        return (
-          <Button onClick={() => window.location.reload()}>
-            Reload page
-          </Button>
-        )
+        return <Button onClick={() => window.location.reload()}>Reload page</Button>
       case 'network-error':
-        return (
-          <Button onClick={onRetry}>
-            Retry
-          </Button>
-        )
+        return <Button onClick={onRetry}>Retry</Button>
       case 'session-expired':
         return (
           <a
@@ -103,7 +96,7 @@ export function ErrorScreen({
             className={cn(
               'inline-flex items-center justify-center rounded-lg font-medium transition-colors',
               'h-10 px-4 text-sm',
-              'bg-brand-600 text-white hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2'
+              'bg-brand-600 text-white hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2',
             )}
           >
             Log in again

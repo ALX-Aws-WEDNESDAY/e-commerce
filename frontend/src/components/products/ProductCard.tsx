@@ -17,9 +17,7 @@ export const RatingBadge: React.FC<RatingBadgeProps> = ({ rating, reviewCount })
   return (
     <span className="inline-flex items-center gap-1 text-sm text-yellow-500 font-medium">
       ★ {rating.toFixed(1)}
-      {reviewCount > 0 && (
-        <span className="text-gray-500 font-normal">({reviewCount})</span>
-      )}
+      {reviewCount > 0 && <span className="text-gray-500 font-normal">({reviewCount})</span>}
     </span>
   )
 }
@@ -32,13 +30,19 @@ interface ProductCardProps {
   isAddingToCart?: boolean
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, isAddingToCart }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({
+  product,
+  onAddToCart,
+  isAddingToCart,
+}) => {
   return (
-    <div className={cn(
-      'bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-transparent',
-      'dark:border-secondary-700 overflow-hidden hover:shadow-md transition-shadow',
-      'flex flex-col'
-    )}>
+    <div
+      className={cn(
+        'bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-transparent',
+        'dark:border-secondary-700 overflow-hidden hover:shadow-md transition-shadow',
+        'flex flex-col',
+      )}
+    >
       {/* Image area */}
       <div className="relative">
         <Link to={`/products/${product.id}`}>
@@ -63,11 +67,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart, 
       {/* Card body */}
       <div className="p-4 flex flex-col flex-1">
         <Link to={`/products/${product.id}`}>
-          <h3 className={cn(
-            'font-medium text-gray-900 dark:text-gray-100 mb-1 line-clamp-2',
-            'hover:text-brand-600 dark:hover:text-brand-400 transition-colors',
-            'min-h-[3rem]'
-          )}>
+          <h3
+            className={cn(
+              'font-medium text-gray-900 dark:text-gray-100 mb-1 line-clamp-2',
+              'hover:text-brand-600 dark:hover:text-brand-400 transition-colors',
+              'min-h-[3rem]',
+            )}
+          >
             {product.name}
           </h3>
         </Link>

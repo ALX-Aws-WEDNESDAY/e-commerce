@@ -2,7 +2,16 @@ import React from 'react'
 import { cn } from '@/utils/cn'
 
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-  variant?: 'new' | 'sale' | 'popular' | 'local' | 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled'
+  variant?:
+    | 'new'
+    | 'sale'
+    | 'popular'
+    | 'local'
+    | 'pending'
+    | 'confirmed'
+    | 'shipped'
+    | 'delivered'
+    | 'cancelled'
 }
 
 export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
@@ -25,14 +34,14 @@ export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
         className={cn(
           'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
           variants[variant],
-          className
+          className,
         )}
         {...props}
       >
         {children}
       </span>
     )
-  }
+  },
 )
 
 Badge.displayName = 'Badge'

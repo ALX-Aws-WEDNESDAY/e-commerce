@@ -33,7 +33,7 @@ export type Product = {
   name: string
   slug: string
   description: string
-  price: string          // Django DecimalField returns string
+  price: string // Django DecimalField returns string
   original_price?: string
   category: Category
   images: ProductImage[]
@@ -130,10 +130,10 @@ export type Review = {
   id: number
   product_id: number
   author_name: string
-  rating: number          // 1–5 integer
+  rating: number // 1–5 integer
   body: string
-  created_at: string      // ISO 8601
-  updated_at: string      // ISO 8601
+  created_at: string // ISO 8601
+  updated_at: string // ISO 8601
 }
 
 export type CreateReviewPayload = {

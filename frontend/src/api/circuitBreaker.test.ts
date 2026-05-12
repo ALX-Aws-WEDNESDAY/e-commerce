@@ -1,10 +1,6 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
 import * as fc from 'fast-check'
-import {
-  CircuitBreaker,
-  CircuitBreakerManager,
-  ServiceUnavailableError,
-} from './circuitBreaker'
+import { CircuitBreaker, CircuitBreakerManager, ServiceUnavailableError } from './circuitBreaker'
 
 describe('CircuitBreaker', () => {
   beforeEach(() => {
@@ -370,7 +366,7 @@ describe('CircuitBreakerManager', () => {
         manager.execute('products', async () => {
           requestFnCalled = true
           return 'response'
-        })
+        }),
       ).rejects.toThrow(ServiceUnavailableError)
 
       expect(requestFnCalled).toBe(false)
@@ -384,9 +380,7 @@ describe('CircuitBreakerManager', () => {
         breaker.recordFailure()
       }
 
-      await expect(
-        manager.execute('products', async () => 'response')
-      ).rejects.toMatchObject({
+      await expect(manager.execute('products', async () => 'response')).rejects.toMatchObject({
         domain: 'products',
       })
     })
@@ -453,7 +447,7 @@ describe('CircuitBreakerManager', () => {
         await expect(
           manager.execute('products', async () => {
             throw new Error('request failed')
-          })
+          }),
         ).rejects.toThrow('request failed')
       }
 
@@ -467,7 +461,7 @@ describe('CircuitBreakerManager', () => {
       await expect(
         manager.execute('products', async () => {
           throw originalError
-        })
+        }),
       ).rejects.toBe(originalError)
     })
   })
@@ -482,15 +476,15 @@ describe('CircuitBreakerManager', () => {
         await expect(
           manager.execute(domain, async () => {
             throw new Error('service down')
-          })
+          }),
         ).rejects.toThrow('service down')
       }
       expect(manager.getBreaker(domain).getState()).toBe('OPEN')
 
       // Step 2: Requests are blocked
-      await expect(
-        manager.execute(domain, async () => 'response')
-      ).rejects.toThrow(ServiceUnavailableError)
+      await expect(manager.execute(domain, async () => 'response')).rejects.toThrow(
+        ServiceUnavailableError,
+      )
 
       // Step 3: After cooldown, probe is allowed
       vi.advanceTimersByTime(30_000)
@@ -508,7 +502,7 @@ describe('CircuitBreakerManager', () => {
         await expect(
           manager.execute(domain, async () => {
             throw new Error('service down')
-          })
+          }),
         ).rejects.toThrow('service down')
       }
 
@@ -519,14 +513,14 @@ describe('CircuitBreakerManager', () => {
       await expect(
         manager.execute(domain, async () => {
           throw new Error('still down')
-        })
+        }),
       ).rejects.toThrow('still down')
       expect(manager.getBreaker(domain).getState()).toBe('OPEN')
 
       // Requests are blocked again
-      await expect(
-        manager.execute(domain, async () => 'response')
-      ).rejects.toThrow(ServiceUnavailableError)
+      await expect(manager.execute(domain, async () => 'response')).rejects.toThrow(
+        ServiceUnavailableError,
+      )
 
       // After another cooldown, probe is allowed again
       vi.advanceTimersByTime(30_000)
@@ -593,7 +587,7 @@ describe('CircuitBreaker — property-based tests', () => {
         // After exactly failureThreshold failures within the window, state SHALL be OPEN
         return breaker.getState() === 'OPEN'
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     )
   })
 
@@ -635,7 +629,7 @@ describe('CircuitBreaker — property-based tests', () => {
         // The request function SHALL NOT have been called
         return threwServiceUnavailable && !requestFnCalled
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     )
   })
 
@@ -643,7 +637,7 @@ describe('CircuitBreaker — property-based tests', () => {
   it('Property 10: Successful probe closes the circuit', () => {
     // Validates: Requirements 4.5
     fc.assert(
-      fc.property(fc.string(), (_domain) => {
+      fc.property(fc.string(), (domain) => {
         const failureThreshold = 5
 
         // Create a fresh CircuitBreaker and open the circuit
@@ -652,6 +646,10 @@ describe('CircuitBreaker — property-based tests', () => {
         for (let i = 0; i < failureThreshold; i++) {
           breaker.recordFailure()
         }
+
+        // Use `domain` to satisfy the property input and keep the
+        // generated string involved in the test.
+        expect(domain).toBeTypeOf('string')
 
         // Circuit must be OPEN before proceeding
         if (breaker.getState() !== 'OPEN') {
@@ -671,7 +669,7 @@ describe('CircuitBreaker — property-based tests', () => {
         breaker.recordSuccess()
         return breaker.getState() === 'CLOSED'
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     )
   })
 
@@ -679,7 +677,7 @@ describe('CircuitBreaker — property-based tests', () => {
   it('Property 11: Failed probe re-opens the circuit', () => {
     // Validates: Requirements 4.6
     fc.assert(
-      fc.property(fc.string(), (_domain) => {
+      fc.property(fc.string(), (domain) => {
         const failureThreshold = 5
 
         // Create a fresh CircuitBreaker and open the circuit
@@ -688,6 +686,9 @@ describe('CircuitBreaker — property-based tests', () => {
         for (let i = 0; i < failureThreshold; i++) {
           breaker.recordFailure()
         }
+
+        // Use `domain` to make the generated value part of the invariant.
+        expect(domain).toBeTypeOf('string')
 
         // Circuit must be OPEN before proceeding
         if (breaker.getState() !== 'OPEN') {
@@ -719,7 +720,7 @@ describe('CircuitBreaker — property-based tests', () => {
         const allowedAfterReset = breaker.allowRequest()
         return allowedAfterReset === true && breaker.getState() === 'HALF_OPEN'
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     )
   })
 
@@ -768,9 +769,9 @@ describe('CircuitBreaker — property-based tests', () => {
           }
 
           return true
-        }
+        },
       ),
-      { numRuns: 200 }
+      { numRuns: 200 },
     )
   })
 })

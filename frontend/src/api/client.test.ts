@@ -74,12 +74,10 @@ vi.mock('@/api/interceptors/retryInterceptor', () => ({
 async function importFreshClient() {
   // Capture mock references BEFORE resetting modules — these are the same
   // function objects that the freshly-imported client.ts will call.
-  const { applyCorrelationIdInterceptor } = await import(
-    '@/api/interceptors/correlationIdInterceptor'
-  )
-  const { applyTokenRefreshInterceptor } = await import(
-    '@/api/interceptors/tokenRefreshInterceptor'
-  )
+  const { applyCorrelationIdInterceptor } =
+    await import('@/api/interceptors/correlationIdInterceptor')
+  const { applyTokenRefreshInterceptor } =
+    await import('@/api/interceptors/tokenRefreshInterceptor')
   const { applyRetryInterceptor } = await import('@/api/interceptors/retryInterceptor')
 
   // Clear accumulated call counts from previous test runs
@@ -123,9 +121,7 @@ describe('client.ts — environment variable handling', () => {
     await importFreshClient()
 
     expect(warnSpy).toHaveBeenCalledOnce()
-    expect(warnSpy).toHaveBeenCalledWith(
-      expect.stringContaining('VITE_API_BASE_URL is not set'),
-    )
+    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('VITE_API_BASE_URL is not set'))
   })
 
   it('does NOT emit a console.warn when VITE_API_BASE_URL is set', async () => {
@@ -170,7 +166,11 @@ describe('client.ts — interceptor registration', () => {
 
     // Axios stores registered interceptors in interceptors.request.handlers.
     // Ejected interceptors become null; filter them out.
-    const handlers = (apiClient.interceptors.request as any).handlers as unknown[]
+    const handlers = (
+      apiClient.interceptors.request as {
+        handlers: Array<unknown>
+      }
+    ).handlers
     const activeHandlers = handlers.filter(Boolean)
 
     expect(activeHandlers).toHaveLength(2)
@@ -185,7 +185,11 @@ describe('client.ts — interceptor registration', () => {
 
     const { apiClient } = await importFreshClient()
 
-    const handlers = (apiClient.interceptors.response as any).handlers as unknown[]
+    const handlers = (
+      apiClient.interceptors.response as {
+        handlers: Array<unknown>
+      }
+    ).handlers
     const activeHandlers = handlers.filter(Boolean)
 
     expect(activeHandlers).toHaveLength(3)
@@ -267,9 +271,9 @@ describe('client.ts — Property-Based Tests', () => {
           // Assert: the full URL (baseURL + path) contains /api/ as a prefix
           const fullUrl = `${capturedBaseURL ?? ''}${capturedUrl ?? ''}`
           expect(fullUrl).toContain('/api/')
-        }
+        },
       ),
-      { numRuns: 100 }
+      { numRuns: 100 },
     )
   })
 })

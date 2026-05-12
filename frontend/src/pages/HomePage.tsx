@@ -24,11 +24,14 @@ export const HomePage: React.FC = () => {
           <div className="text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6 transition-colors">
               Discover Authentic
-              <span className="text-brand-600 dark:text-brand-400 transition-colors"> African Products</span>
+              <span className="text-brand-600 dark:text-brand-400 transition-colors">
+                {' '}
+                African Products
+              </span>
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto transition-colors">
-              Connect with local artisans and businesses across Kenya. 
-              Quality products, fair prices, and authentic craftsmanship.
+              Connect with local artisans and businesses across Kenya. Quality products, fair
+              prices, and authentic craftsmanship.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/products">
@@ -53,22 +56,34 @@ export const HomePage: React.FC = () => {
               <div className="w-16 h-16 bg-brand-100 dark:bg-brand-900/30 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors">
                 <Truck className="h-8 w-8 text-brand-600 dark:text-brand-400" />
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white transition-colors">Fast Delivery</h3>
-              <p className="text-gray-600 dark:text-gray-400 transition-colors">Quick and reliable delivery across Kenya</p>
+              <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white transition-colors">
+                Fast Delivery
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 transition-colors">
+                Quick and reliable delivery across Kenya
+              </p>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-brand-100 dark:bg-brand-900/30 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors">
                 <ShieldCheck className="h-8 w-8 text-brand-600 dark:text-brand-400" />
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white transition-colors">Authentic Products</h3>
-              <p className="text-gray-600 dark:text-gray-400 transition-colors">Genuine items from verified local sellers</p>
+              <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white transition-colors">
+                Authentic Products
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 transition-colors">
+                Genuine items from verified local sellers
+              </p>
             </div>
             <div className="text-center">
               <div className="w-16 h-16 bg-brand-100 dark:bg-brand-900/30 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors">
                 <Lock className="h-8 w-8 text-brand-600 dark:text-brand-400" />
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white transition-colors">Secure Payment</h3>
-              <p className="text-gray-600 dark:text-gray-400 transition-colors">Safe and secure payment methods</p>
+              <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white transition-colors">
+                Secure Payment
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 transition-colors">
+                Safe and secure payment methods
+              </p>
             </div>
           </div>
         </div>
@@ -78,14 +93,21 @@ export const HomePage: React.FC = () => {
       <section className="py-16 bg-gray-50 dark:bg-secondary-900/50 transition-colors duration-200 border-t border-transparent dark:border-secondary-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 transition-colors">Featured Products</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400 transition-colors">Discover our handpicked selection of amazing products</p>
+            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 transition-colors">
+              Featured Products
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-400 transition-colors">
+              Discover our handpicked selection of amazing products
+            </p>
           </div>
 
           {isLoading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="bg-white dark:bg-secondary-800 border border-transparent dark:border-secondary-700 rounded-lg shadow-sm overflow-hidden">
+                <div
+                  key={i}
+                  className="bg-white dark:bg-secondary-800 border border-transparent dark:border-secondary-700 rounded-lg shadow-sm overflow-hidden"
+                >
                   <div className="h-48 bg-gray-200 dark:bg-secondary-700 animate-pulse transition-colors"></div>
                   <div className="p-4 space-y-2">
                     <div className="h-4 bg-gray-200 dark:bg-secondary-700 animate-pulse rounded transition-colors"></div>
@@ -101,7 +123,10 @@ export const HomePage: React.FC = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {featuredProducts?.map((product) => (
-                <div key={product.id} className="bg-white dark:bg-secondary-800 border border-transparent dark:border-secondary-700 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                <div
+                  key={product.id}
+                  className="bg-white dark:bg-secondary-800 border border-transparent dark:border-secondary-700 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+                >
                   <div className="relative">
                     <Link to={`/products/${product.id}`}>
                       <img
@@ -122,19 +147,27 @@ export const HomePage: React.FC = () => {
                         {product.name}
                       </h3>
                     </Link>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{product.location}</p>
-                    <StarRating rating={product.rating} reviewCount={product.review_count} size="sm" />
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                      {product.location}
+                    </p>
+                    <StarRating
+                      rating={product.rating}
+                      reviewCount={product.review_count}
+                      size="sm"
+                    />
                     <div className="mt-3 flex items-center justify-between">
                       <div>
-                        <span className="text-lg font-bold text-brand-600 dark:text-brand-400 transition-colors">{formatPrice(product.price)}</span>
+                        <span className="text-lg font-bold text-brand-600 dark:text-brand-400 transition-colors">
+                          {formatPrice(product.price)}
+                        </span>
                         {product.original_price && (
                           <span className="text-sm text-gray-500 dark:text-gray-400 line-through ml-2 transition-colors">
                             {formatPrice(product.original_price)}
                           </span>
                         )}
                       </div>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         onClick={() => handleAddToCart(product.id)}
                         disabled={!product.in_stock || addToCart.isPending}
                         className="whitespace-nowrap"

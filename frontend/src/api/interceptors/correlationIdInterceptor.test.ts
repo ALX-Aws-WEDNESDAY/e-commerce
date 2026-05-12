@@ -1,6 +1,25 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import axios, { type AxiosInstance } from 'axios'
+import axios, { type AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
 import { applyCorrelationIdInterceptor } from './correlationIdInterceptor'
+
+function createMockAxiosError(
+  message: string,
+  config: InternalAxiosRequestConfig,
+  status: number,
+  statusText: string,
+  headers: Record<string, string>,
+): AxiosError {
+  const error = new Error(message) as AxiosError
+  error.config = config
+  error.response = {
+    data: { error: message },
+    status,
+    statusText,
+    headers,
+    config,
+  }
+  return error
+}
 
 describe('correlationIdInterceptor', () => {
   let client: AxiosInstance
@@ -16,7 +35,7 @@ describe('correlationIdInterceptor', () => {
   describe('Request Interceptor', () => {
     it('should attach a non-empty X-Correlation-ID header to every request', async () => {
       // Arrange: Mock the adapter to capture the request config
-      let capturedConfig: any = null
+      let capturedConfig: InternalAxiosRequestConfig | null = null
       client.defaults.adapter = async (config) => {
         capturedConfig = config
         return {
@@ -33,16 +52,16 @@ describe('correlationIdInterceptor', () => {
 
       // Assert: Verify the header is present and non-empty
       expect(capturedConfig).toBeTruthy()
-      expect(capturedConfig.headers['X-Correlation-ID']).toBeTruthy()
-      expect(typeof capturedConfig.headers['X-Correlation-ID']).toBe('string')
-      expect(capturedConfig.headers['X-Correlation-ID'].length).toBeGreaterThan(0)
+      expect(capturedConfig!.headers['X-Correlation-ID']).toBeTruthy()
+      expect(typeof capturedConfig!.headers['X-Correlation-ID']).toBe('string')
+      expect(capturedConfig!.headers['X-Correlation-ID'].length).toBeGreaterThan(0)
     })
 
     it('should attach a UUID v4 formatted X-Correlation-ID header', async () => {
       // Arrange: UUID v4 regex pattern
       const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
-      let capturedConfig: any = null
+      let capturedConfig: InternalAxiosRequestConfig | null = null
       client.defaults.adapter = async (config) => {
         capturedConfig = config
         return {
@@ -59,13 +78,13 @@ describe('correlationIdInterceptor', () => {
 
       // Assert: Verify the header matches UUID v4 format
       expect(capturedConfig).toBeTruthy()
-      const correlationId = capturedConfig.headers['X-Correlation-ID']
+      const correlationId = capturedConfig!.headers['X-Correlation-ID']
       expect(correlationId).toMatch(uuidV4Regex)
     })
 
     it('should store the correlation ID on config._correlationId', async () => {
       // Arrange
-      let capturedConfig: any = null
+      let capturedConfig: InternalAxiosRequestConfig | null = null
       client.defaults.adapter = async (config) => {
         capturedConfig = config
         return {
@@ -82,11 +101,9 @@ describe('correlationIdInterceptor', () => {
 
       // Assert: Verify _correlationId is set on the config
       expect(capturedConfig).toBeTruthy()
-      expect(capturedConfig._correlationId).toBeTruthy()
-      expect(typeof capturedConfig._correlationId).toBe('string')
-      expect(capturedConfig._correlationId).toBe(
-        capturedConfig.headers['X-Correlation-ID']
-      )
+      expect(capturedConfig!._correlationId).toBeTruthy()
+      expect(typeof capturedConfig!._correlationId).toBe('string')
+      expect(capturedConfig!._correlationId).toBe(capturedConfig!.headers['X-Correlation-ID'])
     })
 
     it('should generate a unique correlation ID for each request', async () => {
@@ -163,26 +180,18 @@ describe('correlationIdInterceptor', () => {
       // Arrange: Server returns an error with correlation ID
       const serverCorrelationId = 'error-123-456-789'
       client.defaults.adapter = async (config) => {
-        const error: any = new Error('Request failed')
-        error.response = {
-          data: { error: 'Something went wrong' },
-          status: 500,
-          statusText: 'Internal Server Error',
-          headers: {
-            'x-correlation-id': serverCorrelationId,
-          },
-          config,
-        }
-        error.config = config
-        throw error
+        throw createMockAxiosError('Request failed', config, 500, 'Internal Server Error', {
+          'x-correlation-id': serverCorrelationId,
+        })
       }
 
       // Act & Assert: Make a request and catch the error
       try {
         await client.get('/test')
         expect.fail('Should have thrown an error')
-      } catch (error: any) {
-        expect(error.response.config._correlationId).toBe(serverCorrelationId)
+      } catch (error: unknown) {
+        const axiosError = error as AxiosError
+        expect(axiosError.response?.config._correlationId).toBe(serverCorrelationId)
       }
     })
 
@@ -191,25 +200,17 @@ describe('correlationIdInterceptor', () => {
       let originalCorrelationId: string | undefined
       client.defaults.adapter = async (config) => {
         originalCorrelationId = config._correlationId
-        const error: any = new Error('Request failed')
-        error.response = {
-          data: { error: 'Something went wrong' },
-          status: 500,
-          statusText: 'Internal Server Error',
-          headers: {}, // No x-correlation-id in response
-          config,
-        }
-        error.config = config
-        throw error
+        throw createMockAxiosError('Request failed', config, 500, 'Internal Server Error', {})
       }
 
       // Act & Assert: Make a request and catch the error
       try {
         await client.get('/test')
         expect.fail('Should have thrown an error')
-      } catch (error: any) {
-        expect(error.response.config._correlationId).toBe(originalCorrelationId)
-        expect(error.response.config._correlationId).toBeTruthy()
+      } catch (error: unknown) {
+        const axiosError = error as AxiosError
+        expect(axiosError.response?.config._correlationId).toBe(originalCorrelationId)
+        expect(axiosError.response?.config._correlationId).toBeTruthy()
       }
     })
   })

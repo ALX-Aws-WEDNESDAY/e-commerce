@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { cartApi } from '@/api'
 import { useCartStore } from '@/store/cart.store'
@@ -9,15 +10,16 @@ export const cartKeys = {
 
 export function useCart() {
   const setCart = useCartStore((s) => s.setCart)
-
-  return useQuery({
+  const query = useQuery({
     queryKey: cartKeys.cart,
-    queryFn: async () => {
-      const cart = await cartApi.get()
-      setCart(cart)
-      return cart
-    },
+    queryFn: () => cartApi.get(),
   })
+
+  useEffect(() => {
+    if (query.data) setCart(query.data)
+  }, [query.data, setCart])
+
+  return query
 }
 
 export function useAddToCart() {
@@ -61,7 +63,7 @@ export function useRemoveCartItem() {
   return useMutation({
     mutationFn: async (itemId: number) => {
       await cartApi.removeItem(itemId)
-      return cartApi.get() // Fetch updated cart
+      return cartApi.get()
     },
     onSuccess: (cart) => {
       setCart(cart)

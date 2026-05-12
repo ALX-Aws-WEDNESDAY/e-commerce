@@ -17,7 +17,7 @@ The project is architected to be connected to a robust Django/PostgreSQL backend
 
 ## 🛠️ Tech Stack
 
-- **Framework**: React 18 + TypeScript + Vite
+- **Framework**: React 19 + TypeScript + Vite
 - **Styling**: Tailwind CSS + Lucide Icons for clean, utility-first UI
 - **State Management**: Zustand (UI state) + React Query (Server state)
 - **Routing**: React Router v6
@@ -46,7 +46,7 @@ npm run dev
 
 ### Environment Configuration
 
-The application is configured via Vite environment files (`.env.development`, `.env.production`).  
+The application is configured via Vite environment files (`.env.development`, `.env.production`).
 Copy `.env.production.example` to `.env.production` and fill in the required values before deploying.
 
 #### Environment Variables

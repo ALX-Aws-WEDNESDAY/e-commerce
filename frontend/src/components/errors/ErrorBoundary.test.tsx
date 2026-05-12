@@ -49,7 +49,7 @@ describe('ErrorBoundary — catching render errors', () => {
       render(
         <ErrorBoundary>
           <ThrowingComponent />
-        </ErrorBoundary>
+        </ErrorBoundary>,
       )
     }).not.toThrow()
   })
@@ -58,7 +58,7 @@ describe('ErrorBoundary — catching render errors', () => {
     render(
       <ErrorBoundary>
         <NormalComponent />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     )
 
     expect(screen.getByText('Normal content')).toBeInTheDocument()
@@ -72,7 +72,7 @@ describe('ErrorBoundary — fallback UI', () => {
     render(
       <ErrorBoundary fallback={<div>Custom fallback UI</div>}>
         <ThrowingComponent />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     )
 
     expect(screen.getByText('Custom fallback UI')).toBeInTheDocument()
@@ -82,7 +82,7 @@ describe('ErrorBoundary — fallback UI', () => {
     render(
       <ErrorBoundary fallback={<div>Fallback shown</div>}>
         <ThrowingComponent message="boom" />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     )
 
     // The fallback is visible; the child's output is not
@@ -98,20 +98,18 @@ describe('ErrorBoundary — default ErrorScreen fallback', () => {
     render(
       <ErrorBoundary>
         <ThrowingComponent />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     )
 
     // ErrorScreen with variant="server-error" renders this heading
-    expect(
-      screen.getByRole('heading', { name: /something went wrong/i })
-    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /something went wrong/i })).toBeInTheDocument()
   })
 
   it('renders the "Reload page" button from the server-error variant', () => {
     render(
       <ErrorBoundary>
         <ThrowingComponent />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     )
 
     expect(screen.getByRole('button', { name: /reload page/i })).toBeInTheDocument()
@@ -121,7 +119,7 @@ describe('ErrorBoundary — default ErrorScreen fallback', () => {
     render(
       <ErrorBoundary>
         <ThrowingComponent />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     )
 
     expect(screen.getByRole('alert')).toBeInTheDocument()
@@ -150,7 +148,7 @@ describe('ErrorBoundary — Property 16: Error boundary catches any render error
         const { unmount } = render(
           <ErrorBoundary fallback={<div>fallback</div>}>
             <ThrowingChild />
-          </ErrorBoundary>
+          </ErrorBoundary>,
         )
 
         // The fallback must be rendered, not the error
@@ -158,7 +156,7 @@ describe('ErrorBoundary — Property 16: Error boundary catches any render error
 
         unmount()
       }),
-      { numRuns: 100 }
+      { numRuns: 100 },
     )
   })
 })

@@ -11,7 +11,7 @@ export const ProductsPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const category = searchParams.get('category')
   const search = searchParams.get('search')
-  
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value
     const newParams = new URLSearchParams(searchParams)
@@ -59,14 +59,18 @@ export const ProductsPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4 transition-colors">All Products</h1>
-        <p className="text-gray-600 dark:text-gray-300 transition-colors">Discover our complete collection of authentic African products</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4 transition-colors">
+          All Products
+        </h1>
+        <p className="text-gray-600 dark:text-gray-300 transition-colors">
+          Discover our complete collection of authentic African products
+        </p>
       </div>
 
       <div className="mb-6 max-w-md">
-        <input 
-          type="text" 
-          placeholder="Search products by name..." 
+        <input
+          type="text"
+          placeholder="Search products by name..."
           className="w-full px-4 py-2 border border-gray-300 dark:border-secondary-700 bg-white dark:bg-secondary-800 rounded-lg focus:ring-2 focus:ring-brand-600 focus:border-brand-600 outline-none transition-colors text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
           value={search || ''}
           onChange={handleSearchChange}
@@ -82,7 +86,11 @@ export const ProductsPage: React.FC = () => {
           description="Check back later for new products from our local sellers."
         />
       ) : (
-        <ProductGrid products={products} onAddToCart={handleAddToCart} isAddingToCart={addToCart.isPending} />
+        <ProductGrid
+          products={products}
+          onAddToCart={handleAddToCart}
+          isAddingToCart={addToCart.isPending}
+        />
       )}
     </div>
   )

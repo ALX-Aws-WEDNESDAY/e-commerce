@@ -28,12 +28,7 @@ export const StarRating: React.FC<StarRatingProps> = ({
 
     for (let i = 0; i < 5; i++) {
       if (i < fullStars) {
-        stars.push(
-          <Star
-            key={i}
-            className={cn('fill-yellow-400 text-yellow-400', sizes[size])}
-          />
-        )
+        stars.push(<Star key={i} className={cn('fill-yellow-400 text-yellow-400', sizes[size])} />)
       } else if (i === fullStars && hasHalfStar) {
         stars.push(
           <div key={i} className="relative">
@@ -41,15 +36,10 @@ export const StarRating: React.FC<StarRatingProps> = ({
             <div className="absolute inset-0 overflow-hidden w-1/2">
               <Star className={cn('fill-yellow-400 text-yellow-400', sizes[size])} />
             </div>
-          </div>
+          </div>,
         )
       } else {
-        stars.push(
-          <Star
-            key={i}
-            className={cn('text-gray-300', sizes[size])}
-          />
-        )
+        stars.push(<Star key={i} className={cn('text-gray-300', sizes[size])} />)
       }
     }
 
@@ -60,9 +50,7 @@ export const StarRating: React.FC<StarRatingProps> = ({
     <div className={cn('flex items-center gap-1', className)}>
       <div className="flex items-center">{renderStars()}</div>
       {reviewCount !== undefined && (
-        <span className="text-sm text-gray-500 ml-1">
-          ({reviewCount})
-        </span>
+        <span className="text-sm text-gray-500 ml-1">({reviewCount})</span>
       )}
     </div>
   )

@@ -13,11 +13,13 @@ export const Layout: React.FC = () => {
 
   useEffect(() => {
     const root = window.document.documentElement
-    
+
     const applyTheme = (currentTheme: 'light' | 'dark' | 'system') => {
       root.classList.remove('light', 'dark')
       if (currentTheme === 'system') {
-        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light'
         root.classList.add(systemTheme)
       } else {
         root.classList.add(currentTheme)
@@ -32,7 +34,7 @@ export const Layout: React.FC = () => {
         applyTheme('system')
       }
     }
-    
+
     mediaQuery.addEventListener('change', handleChange)
     return () => mediaQuery.removeEventListener('change', handleChange)
   }, [theme])

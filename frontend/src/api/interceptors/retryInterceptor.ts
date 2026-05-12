@@ -55,9 +55,7 @@ export function applyRetryInterceptor(client: AxiosInstance): void {
       config._retryCount = retryCount + 1
       config._isRetry = true
 
-      await new Promise<void>((resolve) =>
-        setTimeout(resolve, calculateBackoff(retryCount)),
-      )
+      await new Promise<void>((resolve) => setTimeout(resolve, calculateBackoff(retryCount)))
 
       return client(config)
     },

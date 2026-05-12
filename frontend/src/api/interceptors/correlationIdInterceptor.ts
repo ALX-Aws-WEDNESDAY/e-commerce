@@ -43,8 +43,7 @@ export function applyCorrelationIdInterceptor(client: AxiosInstance): void {
     },
     (error) => {
       if (error.response?.headers?.['x-correlation-id']) {
-        error.response.config._correlationId =
-          error.response.headers['x-correlation-id']
+        error.response.config._correlationId = error.response.headers['x-correlation-id']
       }
       return Promise.reject(error)
     },

@@ -20,9 +20,27 @@ import type { User } from '@/types'
 // ── Representative input sets ─────────────────────────────────────────────────
 
 const USERS: User[] = [
-  { id: 1, email: 'alice@example.com', first_name: 'Alice', last_name: 'Smith', date_joined: '2024-01-01T00:00:00Z' },
-  { id: 2, email: 'bob@example.com', first_name: 'Bob', last_name: 'Jones', date_joined: '2024-06-15T12:00:00Z' },
-  { id: 99, email: 'charlie@example.com', first_name: 'Charlie', last_name: 'Brown', date_joined: '2023-12-31T23:59:59Z' },
+  {
+    id: 1,
+    email: 'alice@example.com',
+    first_name: 'Alice',
+    last_name: 'Smith',
+    date_joined: '2024-01-01T00:00:00Z',
+  },
+  {
+    id: 2,
+    email: 'bob@example.com',
+    first_name: 'Bob',
+    last_name: 'Jones',
+    date_joined: '2024-06-15T12:00:00Z',
+  },
+  {
+    id: 99,
+    email: 'charlie@example.com',
+    first_name: 'Charlie',
+    last_name: 'Brown',
+    date_joined: '2023-12-31T23:59:59Z',
+  },
 ]
 
 const TOKENS: string[] = [
@@ -100,13 +118,16 @@ describe('Property 3.2 — Authorization: Bearer <token> header is attached by r
 
       // Grab the request interceptor handler by running it against a mock config
       const config = {
-        headers: { set: vi.fn(), Authorization: undefined as string | undefined } as unknown as import('axios').AxiosRequestHeaders,
+        headers: {
+          set: vi.fn(),
+          Authorization: undefined as string | undefined,
+        } as unknown as import('axios').AxiosRequestHeaders,
         method: 'get',
       } as unknown as import('axios').InternalAxiosRequestConfig
 
       // Access the interceptor directly via the manager
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const interceptorManager = (apiClient.interceptors.request as any)
+      const interceptorManager = apiClient.interceptors.request as any
       let handlerFn: ((c: typeof config) => typeof config) | null = null
 
       // Iterate registered handlers to find ours
@@ -137,7 +158,7 @@ describe('Property 3.2 — Authorization: Bearer <token> header is attached by r
     } as unknown as import('axios').InternalAxiosRequestConfig
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const interceptorManager = (apiClient.interceptors.request as any)
+    const interceptorManager = apiClient.interceptors.request as any
     let handlerFn: ((c: typeof config) => typeof config) | null = null
     interceptorManager.forEach((h: { fulfilled?: (c: typeof config) => typeof config }) => {
       if (h.fulfilled) handlerFn = h.fulfilled
@@ -197,11 +218,21 @@ describe('Property 3.4 — X-CSRFToken header is attached on POST/PUT/PATCH/DELE
     const { apiClient } = await import('@/api/client')
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const interceptorManager = (apiClient.interceptors.request as any)
-    let handlerFn: ((c: import('axios').InternalAxiosRequestConfig) => import('axios').InternalAxiosRequestConfig) | null = null
-    interceptorManager.forEach((h: { fulfilled?: (c: import('axios').InternalAxiosRequestConfig) => import('axios').InternalAxiosRequestConfig }) => {
-      if (h.fulfilled) handlerFn = h.fulfilled
-    })
+    const interceptorManager = apiClient.interceptors.request as any
+    let handlerFn:
+      | ((
+          c: import('axios').InternalAxiosRequestConfig,
+        ) => import('axios').InternalAxiosRequestConfig)
+      | null = null
+    interceptorManager.forEach(
+      (h: {
+        fulfilled?: (
+          c: import('axios').InternalAxiosRequestConfig,
+        ) => import('axios').InternalAxiosRequestConfig
+      }) => {
+        if (h.fulfilled) handlerFn = h.fulfilled
+      },
+    )
 
     expect(handlerFn).not.toBeNull()
 
@@ -214,7 +245,7 @@ describe('Property 3.4 — X-CSRFToken header is attached on POST/PUT/PATCH/DELE
       const result = handlerFn!(config)
       expect(
         (result.headers as Record<string, string>)['X-CSRFToken'],
-        `X-CSRFToken should be set for ${method}`
+        `X-CSRFToken should be set for ${method}`,
       ).toBe(csrfValue)
     }
   })
@@ -225,11 +256,21 @@ describe('Property 3.4 — X-CSRFToken header is attached on POST/PUT/PATCH/DELE
     const { apiClient } = await import('@/api/client')
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const interceptorManager = (apiClient.interceptors.request as any)
-    let handlerFn: ((c: import('axios').InternalAxiosRequestConfig) => import('axios').InternalAxiosRequestConfig) | null = null
-    interceptorManager.forEach((h: { fulfilled?: (c: import('axios').InternalAxiosRequestConfig) => import('axios').InternalAxiosRequestConfig }) => {
-      if (h.fulfilled) handlerFn = h.fulfilled
-    })
+    const interceptorManager = apiClient.interceptors.request as any
+    let handlerFn:
+      | ((
+          c: import('axios').InternalAxiosRequestConfig,
+        ) => import('axios').InternalAxiosRequestConfig)
+      | null = null
+    interceptorManager.forEach(
+      (h: {
+        fulfilled?: (
+          c: import('axios').InternalAxiosRequestConfig,
+        ) => import('axios').InternalAxiosRequestConfig
+      }) => {
+        if (h.fulfilled) handlerFn = h.fulfilled
+      },
+    )
 
     const config = {
       headers: {} as Record<string, string>,
@@ -252,7 +293,7 @@ describe('Property 3.5 — 401 response triggers redirect to /login', () => {
     const { apiClient } = await import('@/api/client')
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const responseInterceptorManager = (apiClient.interceptors.response as any)
+    const responseInterceptorManager = apiClient.interceptors.response as any
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rejectedFns: Array<(e: any) => any> = []
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -260,7 +301,9 @@ describe('Property 3.5 — 401 response triggers redirect to /login', () => {
       if (h.rejected) rejectedFns.push(h.rejected)
     })
 
-    expect(rejectedFns.length, 'response error interceptors should be registered').toBeGreaterThan(0)
+    expect(rejectedFns.length, 'response error interceptors should be registered').toBeGreaterThan(
+      0,
+    )
 
     const error401 = { response: { status: 401 } }
 
@@ -284,7 +327,7 @@ describe('Property 3.5 — 401 response triggers redirect to /login', () => {
     const { apiClient } = await import('@/api/client')
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const responseInterceptorManager = (apiClient.interceptors.response as any)
+    const responseInterceptorManager = apiClient.interceptors.response as any
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rejectedFns: Array<(e: any) => any> = []
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

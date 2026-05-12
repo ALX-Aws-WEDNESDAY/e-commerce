@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import * as fc from 'fast-check'
-import axios, { type AxiosInstance } from 'axios'
+import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
 import { applyCorrelationIdInterceptor } from './correlationIdInterceptor'
 
 // Feature: frontend-microservice-readiness, Property 1: All requests carry a valid UUID v4 correlation ID
@@ -19,8 +19,7 @@ describe('correlationIdInterceptor - Property-Based Tests', () => {
 
   it('Property 1: All requests carry a valid UUID v4 correlation ID', () => {
     // UUID v4 regex pattern
-    const uuidV4Regex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
     fc.assert(
       fc.asyncProperty(
@@ -30,7 +29,7 @@ describe('correlationIdInterceptor - Property-Based Tests', () => {
         }),
         async (requestConfig) => {
           // Arrange: Mock the adapter to capture the request config
-          let capturedConfig: any = null
+          let capturedConfig: InternalAxiosRequestConfig | null = null
           client.defaults.adapter = async (config) => {
             capturedConfig = config
             return {
@@ -50,15 +49,15 @@ describe('correlationIdInterceptor - Property-Based Tests', () => {
 
           // Assert: X-Correlation-ID header SHALL be present
           expect(capturedConfig).toBeTruthy()
-          expect(capturedConfig.headers['X-Correlation-ID']).toBeTruthy()
+          expect(capturedConfig!.headers['X-Correlation-ID']).toBeTruthy()
 
           // Assert: X-Correlation-ID SHALL be a valid UUID v4 string
-          const correlationId = capturedConfig.headers['X-Correlation-ID']
+          const correlationId = capturedConfig!.headers['X-Correlation-ID']
           expect(typeof correlationId).toBe('string')
           expect(correlationId).toMatch(uuidV4Regex)
 
           // Additional validation: ensure it's stored on config._correlationId
-          expect(capturedConfig._correlationId).toBe(correlationId)
+          expect(capturedConfig!._correlationId).toBe(correlationId)
         },
       ),
       { numRuns: 100 },
@@ -96,9 +95,7 @@ describe('correlationIdInterceptor - Property-Based Tests', () => {
           })
 
           // Assert: response.config._correlationId SHALL be the server-provided correlation ID
-          expect(response.config._correlationId).toBe(
-            requestConfig.serverCorrelationId,
-          )
+          expect(response.config._correlationId).toBe(requestConfig.serverCorrelationId)
         },
       ),
       { numRuns: 100 },

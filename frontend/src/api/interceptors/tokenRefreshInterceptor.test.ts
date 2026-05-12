@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
-import axios, { type AxiosInstance } from 'axios'
+import axios, { type AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
 import { applyTokenRefreshInterceptor } from './tokenRefreshInterceptor'
 import { useAuthStore } from '@/store/auth.store'
 
@@ -10,11 +10,29 @@ vi.mock('@/store/auth.store', () => ({
   },
 }))
 
+function createTokenError(
+  message: string,
+  config: InternalAxiosRequestConfig,
+  status: number,
+  statusText: string,
+): AxiosError<Record<string, string>> {
+  const error = new Error(message) as AxiosError<Record<string, string>>
+  error.config = config
+  error.response = {
+    data: { error: message },
+    status,
+    statusText,
+    headers: {},
+    config,
+  }
+  return error
+}
+
 describe('tokenRefreshInterceptor', () => {
   let client: AxiosInstance
   let mockClearUser: ReturnType<typeof vi.fn>
-  let mockSetTokens: ReturnType<typeof vi.fn>
-  let originalLocation: Partial<Location>
+  let mockSetAccessToken: ReturnType<typeof vi.fn>
+  let originalLocation: typeof window.location
   let mockLocation: { href: string }
 
   beforeEach(() => {
@@ -27,17 +45,16 @@ describe('tokenRefreshInterceptor', () => {
 
     // Mock auth store methods
     mockClearUser = vi.fn()
-    mockSetTokens = vi.fn()
+    mockSetAccessToken = vi.fn()
     vi.mocked(useAuthStore.getState).mockReturnValue({
       clearUser: mockClearUser,
-      setTokens: mockSetTokens,
-    } as any)
+      setAccessToken: mockSetAccessToken,
+    } as unknown as ReturnType<typeof useAuthStore.getState>)
 
     // Mock window.location
     originalLocation = window.location
     mockLocation = { href: '' }
-    delete (window as any).location
-    window.location = mockLocation as any
+    Object.defineProperty(window, 'location', { writable: true, configurable: true, value: mockLocation })
 
     // Mock document.cookie
     Object.defineProperty(document, 'cookie', {
@@ -47,7 +64,7 @@ describe('tokenRefreshInterceptor', () => {
   })
 
   afterEach(() => {
-    window.location = originalLocation as any
+    Object.defineProperty(window, 'location', { writable: true, configurable: true, value: originalLocation })
     vi.clearAllMocks()
   })
 
@@ -63,16 +80,7 @@ describe('tokenRefreshInterceptor', () => {
 
         // First call: GET /products returns 401
         if (callCount === 1 && config.url === '/products') {
-          const error: any = new Error('Unauthorized')
-          error.response = {
-            data: { error: 'Token expired' },
-            status: 401,
-            statusText: 'Unauthorized',
-            headers: {},
-            config,
-          }
-          error.config = config
-          throw error
+          throw createTokenError('Unauthorized', config, 401, 'Unauthorized')
         }
 
         // Second call: POST /users/refresh/ succeeds
@@ -108,7 +116,7 @@ describe('tokenRefreshInterceptor', () => {
       expect(callCount).toBe(3)
       expect(response.status).toBe(200)
       expect(response.data).toEqual({ products: [] })
-      expect(mockSetTokens).toHaveBeenCalledWith('new-access-token', '')
+      expect(mockSetAccessToken).toHaveBeenCalledWith('new-access-token')
     })
   })
 
@@ -124,33 +132,26 @@ describe('tokenRefreshInterceptor', () => {
 
         // POST /users/login/ returns 401
         if (config.url === '/users/login/') {
-          const error: any = new Error('Unauthorized')
-          error.response = {
-            data: { error: 'Invalid credentials' },
-            status: 401,
-            statusText: 'Unauthorized',
-            headers: {},
-            config,
-          }
-          error.config = config
-          throw error
+          throw createTokenError('Unauthorized', config, 401, 'Unauthorized')
         }
 
         throw new Error(`Unexpected call: ${config.url}`)
       }
 
       // Act: Make a POST request to /users/login/ and catch the error
-      let caughtError: any = null
-      await client.post('/users/login/', { username: 'test', password: 'test' }).catch((error) => {
-        caughtError = error
-      })
+      let caughtError: AxiosError<Record<string, string>> | null = null
+      await client
+        .post('/users/login/', { username: 'test', password: 'test' })
+        .catch((error: unknown) => {
+          caughtError = error as AxiosError<Record<string, string>>
+        })
 
       // Assert: Should NOT have called refresh endpoint
       expect(calls).toEqual(['/users/login/'])
       expect(callCount).toBe(1)
       expect(caughtError).toBeTruthy()
-      expect(caughtError.response.status).toBe(401)
-      expect(mockSetTokens).not.toHaveBeenCalled()
+      expect(caughtError!.response?.status).toBe(401)
+      expect(mockSetAccessToken).not.toHaveBeenCalled()
       expect(mockClearUser).not.toHaveBeenCalled()
     })
   })
@@ -167,33 +168,24 @@ describe('tokenRefreshInterceptor', () => {
 
         // POST /users/refresh/ returns 401
         if (config.url === '/users/refresh/') {
-          const error: any = new Error('Unauthorized')
-          error.response = {
-            data: { error: 'Refresh token expired' },
-            status: 401,
-            statusText: 'Unauthorized',
-            headers: {},
-            config,
-          }
-          error.config = config
-          throw error
+          throw createTokenError('Unauthorized', config, 401, 'Unauthorized')
         }
 
         throw new Error(`Unexpected call: ${config.url}`)
       }
 
       // Act: Make a POST request to /users/refresh/ and catch the error
-      let caughtError: any = null
-      await client.post('/users/refresh/').catch((error) => {
-        caughtError = error
+      let caughtError: AxiosError<Record<string, string>> | null = null
+      await client.post('/users/refresh/').catch((error: unknown) => {
+        caughtError = error as AxiosError<Record<string, string>>
       })
 
       // Assert: Should NOT have called refresh endpoint again
       expect(calls).toEqual(['/users/refresh/'])
       expect(callCount).toBe(1)
       expect(caughtError).toBeTruthy()
-      expect(caughtError.response.status).toBe(401)
-      expect(mockSetTokens).not.toHaveBeenCalled()
+      expect(caughtError!.response?.status).toBe(401)
+      expect(mockSetAccessToken).not.toHaveBeenCalled()
       expect(mockClearUser).not.toHaveBeenCalled()
     })
   })
@@ -202,24 +194,15 @@ describe('tokenRefreshInterceptor', () => {
     it('should replay the original request with the new access token', async () => {
       // Arrange: Track adapter calls and headers
       let callCount = 0
-      const calls: Array<{ url: string; headers: any }> = []
+      const calls: Array<{ url: string; headers: Record<string, string> }> = []
 
       client.defaults.adapter = async (config) => {
         callCount++
-        calls.push({ url: config.url || '', headers: config.headers })
+        calls.push({ url: config.url || '', headers: config.headers as Record<string, string> })
 
         // First call: GET /cart returns 401
         if (callCount === 1 && config.url === '/cart') {
-          const error: any = new Error('Unauthorized')
-          error.response = {
-            data: { error: 'Token expired' },
-            status: 401,
-            statusText: 'Unauthorized',
-            headers: {},
-            config,
-          }
-          error.config = config
-          throw error
+          throw createTokenError('Unauthorized', config, 401, 'Unauthorized')
         }
 
         // Second call: POST /users/refresh/ succeeds
@@ -258,7 +241,7 @@ describe('tokenRefreshInterceptor', () => {
       expect(calls[2].headers['Authorization']).toBe('Bearer new-access-token')
       expect(response.status).toBe(200)
       expect(response.data).toEqual({ items: [] })
-      expect(mockSetTokens).toHaveBeenCalledWith('new-access-token', '')
+      expect(mockSetAccessToken).toHaveBeenCalledWith('new-access-token')
     })
   })
 
@@ -272,39 +255,21 @@ describe('tokenRefreshInterceptor', () => {
 
         // First call: GET /orders returns 401
         if (callCount === 1 && config.url === '/orders') {
-          const error: any = new Error('Unauthorized')
-          error.response = {
-            data: { error: 'Token expired' },
-            status: 401,
-            statusText: 'Unauthorized',
-            headers: {},
-            config,
-          }
-          error.config = config
-          throw error
+          throw createTokenError('Unauthorized', config, 401, 'Unauthorized')
         }
 
         // Second call: POST /users/refresh/ returns 401 (refresh token expired)
         if (callCount === 2 && config.url === '/users/refresh/') {
-          const error: any = new Error('Unauthorized')
-          error.response = {
-            data: { error: 'Refresh token expired' },
-            status: 401,
-            statusText: 'Unauthorized',
-            headers: {},
-            config,
-          }
-          error.config = config
-          throw error
+          throw createTokenError('Unauthorized', config, 401, 'Unauthorized')
         }
 
         throw new Error(`Unexpected call: ${config.url}`)
       }
 
       // Act: Make a GET request to /orders and catch the error
-      let caughtError: any = null
-      await client.get('/orders').catch((error) => {
-        caughtError = error
+      let caughtError: AxiosError<Record<string, string>> | null = null
+      await client.get('/orders').catch((error: unknown) => {
+        caughtError = error as AxiosError<Record<string, string>>
       })
 
       // Assert: Should have cleared user and redirected to /login
@@ -323,39 +288,21 @@ describe('tokenRefreshInterceptor', () => {
 
         // First call: GET /orders returns 401
         if (callCount === 1 && config.url === '/orders') {
-          const error: any = new Error('Unauthorized')
-          error.response = {
-            data: { error: 'Token expired' },
-            status: 401,
-            statusText: 'Unauthorized',
-            headers: {},
-            config,
-          }
-          error.config = config
-          throw error
+          throw createTokenError('Unauthorized', config, 401, 'Unauthorized')
         }
 
         // Second call: POST /users/refresh/ returns 403 (forbidden)
         if (callCount === 2 && config.url === '/users/refresh/') {
-          const error: any = new Error('Forbidden')
-          error.response = {
-            data: { error: 'Refresh token invalid' },
-            status: 403,
-            statusText: 'Forbidden',
-            headers: {},
-            config,
-          }
-          error.config = config
-          throw error
+          throw createTokenError('Forbidden', config, 403, 'Forbidden')
         }
 
         throw new Error(`Unexpected call: ${config.url}`)
       }
 
       // Act: Make a GET request to /orders and catch the error
-      let caughtError: any = null
-      await client.get('/orders').catch((error) => {
-        caughtError = error
+      let caughtError: AxiosError<Record<string, string>> | null = null
+      await client.get('/orders').catch((error: unknown) => {
+        caughtError = error as AxiosError<Record<string, string>>
       })
 
       // Assert: Should have cleared user and redirected to /login
@@ -381,25 +328,16 @@ describe('tokenRefreshInterceptor', () => {
 
         // GET /products returns 401
         if (config.url === '/products') {
-          const error: any = new Error('Unauthorized')
-          error.response = {
-            data: { error: 'Token expired' },
-            status: 401,
-            statusText: 'Unauthorized',
-            headers: {},
-            config,
-          }
-          error.config = config
-          throw error
+          throw createTokenError('Unauthorized', config, 401, 'Unauthorized')
         }
 
         throw new Error(`Unexpected call: ${config.url}`)
       }
 
       // Act: Make a GET request to /products and catch the error
-      let caughtError: any = null
-      await client.get('/products').catch((error) => {
-        caughtError = error
+      let caughtError: AxiosError<Record<string, string>> | null = null
+      await client.get('/products').catch((error: unknown) => {
+        caughtError = error as AxiosError<Record<string, string>>
       })
 
       // Assert: Should have cleared user and redirected without calling refresh
@@ -421,17 +359,11 @@ describe('tokenRefreshInterceptor', () => {
         calls.push(config.url || '')
 
         // First two calls: GET /products and GET /cart both return 401
-        if ((callCount === 1 || callCount === 2) && (config.url === '/products' || config.url === '/cart')) {
-          const error: any = new Error('Unauthorized')
-          error.response = {
-            data: { error: 'Token expired' },
-            status: 401,
-            statusText: 'Unauthorized',
-            headers: {},
-            config,
-          }
-          error.config = config
-          throw error
+        if (
+          (callCount === 1 || callCount === 2) &&
+          (config.url === '/products' || config.url === '/cart')
+        ) {
+          throw createTokenError('Unauthorized', config, 401, 'Unauthorized')
         }
 
         // Third call: POST /users/refresh/ succeeds
@@ -446,7 +378,10 @@ describe('tokenRefreshInterceptor', () => {
         }
 
         // Fourth and fifth calls: Replay GET /products and GET /cart
-        if ((callCount === 4 || callCount === 5) && (config.url === '/products' || config.url === '/cart')) {
+        if (
+          (callCount === 4 || callCount === 5) &&
+          (config.url === '/products' || config.url === '/cart')
+        ) {
           return {
             data: { success: true },
             status: 200,
@@ -470,7 +405,7 @@ describe('tokenRefreshInterceptor', () => {
       expect(calls.filter((url) => url === '/users/refresh/')).toHaveLength(1)
       expect(response1.status).toBe(200)
       expect(response2.status).toBe(200)
-      expect(mockSetTokens).toHaveBeenCalledWith('new-access-token', '')
+      expect(mockSetAccessToken).toHaveBeenCalledWith('new-access-token')
     })
   })
 })
@@ -482,8 +417,8 @@ import * as fc from 'fast-check'
 describe('tokenRefreshInterceptor - Property-Based Tests', () => {
   let client: AxiosInstance
   let mockClearUser: ReturnType<typeof vi.fn>
-  let mockSetTokens: ReturnType<typeof vi.fn>
-  let originalLocation: Partial<Location>
+  let mockSetAccessToken: ReturnType<typeof vi.fn>
+  let originalLocation: typeof window.location
   let mockLocation: { href: string }
 
   beforeEach(() => {
@@ -496,17 +431,16 @@ describe('tokenRefreshInterceptor - Property-Based Tests', () => {
 
     // Mock auth store methods
     mockClearUser = vi.fn()
-    mockSetTokens = vi.fn()
+    mockSetAccessToken = vi.fn()
     vi.mocked(useAuthStore.getState).mockReturnValue({
       clearUser: mockClearUser,
-      setTokens: mockSetTokens,
-    } as any)
+      setAccessToken: mockSetAccessToken,
+    } as unknown as ReturnType<typeof useAuthStore.getState>)
 
     // Mock window.location
     originalLocation = window.location
     mockLocation = { href: '' }
-    delete (window as any).location
-    window.location = mockLocation as any
+    Object.defineProperty(window, 'location', { writable: true, configurable: true, value: mockLocation })
 
     // Mock document.cookie
     Object.defineProperty(document, 'cookie', {
@@ -516,7 +450,7 @@ describe('tokenRefreshInterceptor - Property-Based Tests', () => {
   })
 
   afterEach(() => {
-    window.location = originalLocation as any
+    Object.defineProperty(window, 'location', { writable: true, configurable: true, value: originalLocation })
     vi.clearAllMocks()
   })
 
@@ -526,7 +460,7 @@ describe('tokenRefreshInterceptor - Property-Based Tests', () => {
       await fc.assert(
         fc.asyncProperty(fc.integer({ min: 2, max: 10 }), async (N) => {
           // Reset mocks for each property test iteration
-          mockSetTokens.mockClear()
+          mockSetAccessToken.mockClear()
           mockClearUser.mockClear()
 
           // Arrange: Track adapter calls
@@ -540,16 +474,12 @@ describe('tokenRefreshInterceptor - Property-Based Tests', () => {
 
             // First N calls: All endpoints return 401
             if (callCount <= N && requestUrls.includes(config.url || '')) {
-              const error: any = new Error('Unauthorized')
-              error.response = {
-                data: { error: 'Token expired' },
-                status: 401,
-                statusText: 'Unauthorized',
-                headers: {},
+              throw createTokenError(
+                'Unauthorized',
                 config,
-              }
-              error.config = config
-              throw error
+                401,
+                'Unauthorized',
+              )
             }
 
             // Next call: POST /users/refresh/ succeeds
@@ -596,8 +526,8 @@ describe('tokenRefreshInterceptor - Property-Based Tests', () => {
           expect(callCount).toBe(N + 1 + N)
 
           // Assert: setTokens should have been called once with the new token
-          expect(mockSetTokens).toHaveBeenCalledWith('new-access-token', '')
-          expect(mockSetTokens).toHaveBeenCalledTimes(1)
+          expect(mockSetAccessToken).toHaveBeenCalledWith('new-access-token')
+          expect(mockSetAccessToken).toHaveBeenCalledTimes(1)
         }),
         { numRuns: 100 },
       )
@@ -614,55 +544,48 @@ describe('tokenRefreshInterceptor - Property-Based Tests', () => {
      */
     it('should NOT attempt a token refresh when an auth endpoint returns 401', async () => {
       await fc.assert(
-        fc.asyncProperty(
-          fc.constantFrom('/users/login/', '/users/refresh/'),
-          async (authUrl) => {
-            // Reset mocks for each property test iteration
-            mockSetTokens.mockClear()
-            mockClearUser.mockClear()
+        fc.asyncProperty(fc.constantFrom('/users/login/', '/users/refresh/'), async (authUrl) => {
+          // Reset mocks for each property test iteration
+          mockSetAccessToken.mockClear()
+          mockClearUser.mockClear()
 
-            // Arrange: Track adapter calls
-            const calls: string[] = []
+          // Arrange: Track adapter calls
+          const calls: string[] = []
 
-            client.defaults.adapter = async (config) => {
-              calls.push(config.url || '')
+          client.defaults.adapter = async (config) => {
+            calls.push(config.url || '')
 
-              // Auth endpoint always returns 401
-              if (config.url === authUrl) {
-                const error: any = new Error('Unauthorized')
-                error.response = {
-                  data: { error: 'Unauthorized' },
-                  status: 401,
-                  statusText: 'Unauthorized',
-                  headers: {},
-                  config,
-                }
-                error.config = config
-                throw error
-              }
-
-              // Any other call is unexpected — the interceptor must not call refresh
-              throw new Error(`Unexpected call to: ${config.url}`)
+            // Auth endpoint always returns 401
+            if (config.url === authUrl) {
+              throw createTokenError(
+                'Unauthorized',
+                config,
+                401,
+                'Unauthorized',
+              )
             }
 
-            // Act: Make a request to the auth endpoint and capture the error
-            let caughtError: any = null
-            await client.post(authUrl).catch((err) => {
-              caughtError = err
-            })
+            // Any other call is unexpected — the interceptor must not call refresh
+            throw new Error(`Unexpected call to: ${config.url}`)
+          }
 
-            // Assert: The error should have been propagated as-is
-            expect(caughtError).toBeTruthy()
-            expect(caughtError.response?.status).toBe(401)
+          // Act: Make a request to the auth endpoint and capture the error
+          let caughtError: AxiosError<Record<string, string>> | null = null
+          await client.post(authUrl).catch((err: unknown) => {
+            caughtError = err as AxiosError<Record<string, string>>
+          })
 
-            // Assert: Only the original auth endpoint was called — no refresh attempt
-            expect(calls).toEqual([authUrl])
+          // Assert: The error should have been propagated as-is
+          expect(caughtError).toBeTruthy()
+          expect(caughtError!.response?.status).toBe(401)
 
-            // Assert: Auth store must not have been touched
-            expect(mockSetTokens).not.toHaveBeenCalled()
-            expect(mockClearUser).not.toHaveBeenCalled()
-          },
-        ),
+          // Assert: Only the original auth endpoint was called — no refresh attempt
+          expect(calls).toEqual([authUrl])
+
+          // Assert: Auth store must not have been touched
+          expect(mockSetAccessToken).not.toHaveBeenCalled()
+          expect(mockClearUser).not.toHaveBeenCalled()
+        }),
         { numRuns: 100 },
       )
     })

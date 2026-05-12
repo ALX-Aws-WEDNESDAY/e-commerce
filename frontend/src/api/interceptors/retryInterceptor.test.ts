@@ -1,7 +1,28 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest'
-import axios, { type AxiosInstance } from 'axios'
+import axios, { type AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios'
 import { applyRetryInterceptor, calculateBackoff } from './retryInterceptor'
 import * as fc from 'fast-check'
+
+function createRetryError(
+  message: string,
+  config: InternalAxiosRequestConfig,
+  status?: number,
+): AxiosError {
+  const error = new Error(message) as AxiosError
+  error.config = config
+
+  if (status !== undefined) {
+    error.response = {
+      data: { error: message },
+      status,
+      statusText: 'Error',
+      headers: {},
+      config,
+    }
+  }
+
+  return error
+}
 
 describe('retryInterceptor', () => {
   let client: AxiosInstance
@@ -49,20 +70,12 @@ describe('retryInterceptor', () => {
       let attemptCount = 0
       client.defaults.adapter = async (config) => {
         attemptCount++
-        const error: any = new Error('Service Unavailable')
-        error.response = {
-          data: { error: 'Service temporarily unavailable' },
-          status: 503,
-          statusText: 'Service Unavailable',
-          headers: {},
-          config,
-        }
-        error.config = config
-        throw error
+        throw createRetryError('Service Unavailable', config, 503)
       }
 
       // Act: Make a GET request
       const requestPromise = client.get('/test')
+      requestPromise.catch(() => {}) // prevent unhandled-rejection flag before await
 
       // Fast-forward through all retry delays
       await vi.runAllTimersAsync()
@@ -71,8 +84,8 @@ describe('retryInterceptor', () => {
       try {
         await requestPromise
         expect.fail('Should have thrown an error')
-      } catch (error: any) {
-        expect(error.message).toBe('Service Unavailable')
+      } catch (error: unknown) {
+        expect((error as AxiosError).message).toBe('Service Unavailable')
       }
       expect(attemptCount).toBe(4)
     })
@@ -83,16 +96,7 @@ describe('retryInterceptor', () => {
       client.defaults.adapter = async (config) => {
         attemptCount++
         if (attemptCount <= 2) {
-          const error: any = new Error('Service Unavailable')
-          error.response = {
-            data: { error: 'Service temporarily unavailable' },
-            status: 503,
-            statusText: 'Service Unavailable',
-            headers: {},
-            config,
-          }
-          error.config = config
-          throw error
+          throw createRetryError('Service Unavailable', config, 503)
         }
         // Third attempt succeeds
         return {
@@ -106,6 +110,7 @@ describe('retryInterceptor', () => {
 
       // Act: Make a GET request
       const requestPromise = client.get('/test')
+      requestPromise.catch(() => {}) // prevent unhandled-rejection flag before await
 
       // Fast-forward through retry delays
       await vi.runAllTimersAsync()
@@ -125,24 +130,15 @@ describe('retryInterceptor', () => {
       let attemptCount = 0
       client.defaults.adapter = async (config) => {
         attemptCount++
-        const error: any = new Error('Service Unavailable')
-        error.response = {
-          data: { error: 'Service temporarily unavailable' },
-          status: 503,
-          statusText: 'Service Unavailable',
-          headers: {},
-          config,
-        }
-        error.config = config
-        throw error
+        throw createRetryError('Service Unavailable', config, 503)
       }
 
       // Act: Make a POST request and catch the error
       try {
         await client.post('/test', { data: 'test' })
         expect.fail('Should have thrown an error')
-      } catch (error: any) {
-        expect(error.message).toBe('Service Unavailable')
+      } catch (error: unknown) {
+        expect((error as AxiosError).message).toBe('Service Unavailable')
       }
 
       // Assert: Should have made only 1 attempt (no retries)
@@ -156,24 +152,15 @@ describe('retryInterceptor', () => {
       let attemptCount = 0
       client.defaults.adapter = async (config) => {
         attemptCount++
-        const error: any = new Error('Not Found')
-        error.response = {
-          data: { error: 'Resource not found' },
-          status: 404,
-          statusText: 'Not Found',
-          headers: {},
-          config,
-        }
-        error.config = config
-        throw error
+        throw createRetryError('Not Found', config, 404)
       }
 
       // Act: Make a GET request and catch the error
       try {
         await client.get('/test')
         expect.fail('Should have thrown an error')
-      } catch (error: any) {
-        expect(error.message).toBe('Not Found')
+      } catch (error: unknown) {
+        expect((error as AxiosError).message).toBe('Not Found')
       }
 
       // Assert: Should have made only 1 attempt (no retries)
@@ -187,24 +174,15 @@ describe('retryInterceptor', () => {
       let attemptCount = 0
       client.defaults.adapter = async (config) => {
         attemptCount++
-        const error: any = new Error('Unauthorized')
-        error.response = {
-          data: { error: 'Authentication required' },
-          status: 401,
-          statusText: 'Unauthorized',
-          headers: {},
-          config,
-        }
-        error.config = config
-        throw error
+        throw createRetryError('Unauthorized', config, 401)
       }
 
       // Act: Make a GET request and catch the error
       try {
         await client.get('/test')
         expect.fail('Should have thrown an error')
-      } catch (error: any) {
-        expect(error.message).toBe('Unauthorized')
+      } catch (error: unknown) {
+        expect((error as AxiosError).message).toBe('Unauthorized')
       }
 
       // Assert: Should have made only 1 attempt (no retries)
@@ -218,20 +196,12 @@ describe('retryInterceptor', () => {
       let attemptCount = 0
       client.defaults.adapter = async (config) => {
         attemptCount++
-        const error: any = new Error('Bad Gateway')
-        error.response = {
-          data: { error: 'Bad Gateway' },
-          status: 502,
-          statusText: 'Bad Gateway',
-          headers: {},
-          config,
-        }
-        error.config = config
-        throw error
+        throw createRetryError('Bad Gateway', config, 502)
       }
 
       // Act: Make a GET request
       const requestPromise = client.get('/test')
+      requestPromise.catch(() => {}) // prevent unhandled-rejection flag before await
 
       // Fast-forward through all retry delays
       await vi.runAllTimersAsync()
@@ -240,8 +210,8 @@ describe('retryInterceptor', () => {
       try {
         await requestPromise
         expect.fail('Should have thrown an error')
-      } catch (error: any) {
-        expect(error.message).toBe('Bad Gateway')
+      } catch (error: unknown) {
+        expect((error as AxiosError).message).toBe('Bad Gateway')
       }
       expect(attemptCount).toBe(4)
     })
@@ -251,20 +221,12 @@ describe('retryInterceptor', () => {
       let attemptCount = 0
       client.defaults.adapter = async (config) => {
         attemptCount++
-        const error: any = new Error('Gateway Timeout')
-        error.response = {
-          data: { error: 'Gateway Timeout' },
-          status: 504,
-          statusText: 'Gateway Timeout',
-          headers: {},
-          config,
-        }
-        error.config = config
-        throw error
+        throw createRetryError('Gateway Timeout', config, 504)
       }
 
       // Act: Make a GET request
       const requestPromise = client.get('/test')
+      requestPromise.catch(() => {}) // prevent unhandled-rejection flag before await
 
       // Fast-forward through all retry delays
       await vi.runAllTimersAsync()
@@ -273,8 +235,8 @@ describe('retryInterceptor', () => {
       try {
         await requestPromise
         expect.fail('Should have thrown an error')
-      } catch (error: any) {
-        expect(error.message).toBe('Gateway Timeout')
+      } catch (error: unknown) {
+        expect((error as AxiosError).message).toBe('Gateway Timeout')
       }
       expect(attemptCount).toBe(4)
     })
@@ -286,14 +248,12 @@ describe('retryInterceptor', () => {
       let attemptCount = 0
       client.defaults.adapter = async (config) => {
         attemptCount++
-        const error: any = new Error('Network Error')
-        error.config = config
-        // No response property (simulates network error)
-        throw error
+        throw createRetryError('Network Error', config)
       }
 
       // Act: Make a GET request
       const requestPromise = client.get('/test')
+      requestPromise.catch(() => {}) // prevent unhandled-rejection flag before await
 
       // Fast-forward through all retry delays
       await vi.runAllTimersAsync()
@@ -302,8 +262,8 @@ describe('retryInterceptor', () => {
       try {
         await requestPromise
         expect.fail('Should have thrown an error')
-      } catch (error: any) {
-        expect(error.message).toBe('Network Error')
+      } catch (error: unknown) {
+        expect((error as AxiosError).message).toBe('Network Error')
       }
       expect(attemptCount).toBe(4)
     })
@@ -315,20 +275,12 @@ describe('retryInterceptor', () => {
       let attemptCount = 0
       client.defaults.adapter = async (config) => {
         attemptCount++
-        const error: any = new Error('Service Unavailable')
-        error.response = {
-          data: {},
-          status: 503,
-          statusText: 'Service Unavailable',
-          headers: {},
-          config,
-        }
-        error.config = config
-        throw error
+        throw createRetryError('Service Unavailable', config, 503)
       }
 
       // Act: Make a HEAD request
       const requestPromise = client.head('/test')
+      requestPromise.catch(() => {}) // prevent unhandled-rejection flag before await
 
       // Fast-forward through all retry delays
       await vi.runAllTimersAsync()
@@ -337,8 +289,8 @@ describe('retryInterceptor', () => {
       try {
         await requestPromise
         expect.fail('Should have thrown an error')
-      } catch (error: any) {
-        expect(error.message).toBe('Service Unavailable')
+      } catch (error: unknown) {
+        expect((error as AxiosError).message).toBe('Service Unavailable')
       }
       expect(attemptCount).toBe(4)
     })
@@ -348,20 +300,12 @@ describe('retryInterceptor', () => {
       let attemptCount = 0
       client.defaults.adapter = async (config) => {
         attemptCount++
-        const error: any = new Error('Service Unavailable')
-        error.response = {
-          data: {},
-          status: 503,
-          statusText: 'Service Unavailable',
-          headers: {},
-          config,
-        }
-        error.config = config
-        throw error
+        throw createRetryError('Service Unavailable', config, 503)
       }
 
       // Act: Make an OPTIONS request
       const requestPromise = client.options('/test')
+      requestPromise.catch(() => {}) // prevent unhandled-rejection flag before await
 
       // Fast-forward through all retry delays
       await vi.runAllTimersAsync()
@@ -370,8 +314,8 @@ describe('retryInterceptor', () => {
       try {
         await requestPromise
         expect.fail('Should have thrown an error')
-      } catch (error: any) {
-        expect(error.message).toBe('Service Unavailable')
+      } catch (error: unknown) {
+        expect((error as AxiosError).message).toBe('Service Unavailable')
       }
       expect(attemptCount).toBe(4)
     })
@@ -383,24 +327,15 @@ describe('retryInterceptor', () => {
       let attemptCount = 0
       client.defaults.adapter = async (config) => {
         attemptCount++
-        const error: any = new Error('Service Unavailable')
-        error.response = {
-          data: { error: 'Service temporarily unavailable' },
-          status: 503,
-          statusText: 'Service Unavailable',
-          headers: {},
-          config,
-        }
-        error.config = config
-        throw error
+        throw createRetryError('Service Unavailable', config, 503)
       }
 
       // Act: Make a PUT request and catch the error
       try {
         await client.put('/test', { data: 'test' })
         expect.fail('Should have thrown an error')
-      } catch (error: any) {
-        expect(error.message).toBe('Service Unavailable')
+      } catch (error: unknown) {
+        expect((error as AxiosError).message).toBe('Service Unavailable')
       }
 
       // Assert: Should have made only 1 attempt (no retries)
@@ -412,24 +347,15 @@ describe('retryInterceptor', () => {
       let attemptCount = 0
       client.defaults.adapter = async (config) => {
         attemptCount++
-        const error: any = new Error('Service Unavailable')
-        error.response = {
-          data: { error: 'Service temporarily unavailable' },
-          status: 503,
-          statusText: 'Service Unavailable',
-          headers: {},
-          config,
-        }
-        error.config = config
-        throw error
+        throw createRetryError('Service Unavailable', config, 503)
       }
 
       // Act: Make a PATCH request and catch the error
       try {
         await client.patch('/test', { data: 'test' })
         expect.fail('Should have thrown an error')
-      } catch (error: any) {
-        expect(error.message).toBe('Service Unavailable')
+      } catch (error: unknown) {
+        expect((error as AxiosError).message).toBe('Service Unavailable')
       }
 
       // Assert: Should have made only 1 attempt (no retries)
@@ -441,24 +367,15 @@ describe('retryInterceptor', () => {
       let attemptCount = 0
       client.defaults.adapter = async (config) => {
         attemptCount++
-        const error: any = new Error('Service Unavailable')
-        error.response = {
-          data: { error: 'Service temporarily unavailable' },
-          status: 503,
-          statusText: 'Service Unavailable',
-          headers: {},
-          config,
-        }
-        error.config = config
-        throw error
+        throw createRetryError('Service Unavailable', config, 503)
       }
 
       // Act: Make a DELETE request and catch the error
       try {
         await client.delete('/test')
         expect.fail('Should have thrown an error')
-      } catch (error: any) {
-        expect(error.message).toBe('Service Unavailable')
+      } catch (error: unknown) {
+        expect((error as AxiosError).message).toBe('Service Unavailable')
       }
 
       // Assert: Should have made only 1 attempt (no retries)
@@ -472,24 +389,15 @@ describe('retryInterceptor', () => {
       let attemptCount = 0
       client.defaults.adapter = async (config) => {
         attemptCount++
-        const error: any = new Error('Bad Request')
-        error.response = {
-          data: { error: 'Invalid request' },
-          status: 400,
-          statusText: 'Bad Request',
-          headers: {},
-          config,
-        }
-        error.config = config
-        throw error
+        throw createRetryError('Bad Request', config, 400)
       }
 
       // Act: Make a GET request and catch the error
       try {
         await client.get('/test')
         expect.fail('Should have thrown an error')
-      } catch (error: any) {
-        expect(error.message).toBe('Bad Request')
+      } catch (error: unknown) {
+        expect((error as AxiosError).message).toBe('Bad Request')
       }
 
       // Assert: Should have made only 1 attempt (no retries)
@@ -501,24 +409,15 @@ describe('retryInterceptor', () => {
       let attemptCount = 0
       client.defaults.adapter = async (config) => {
         attemptCount++
-        const error: any = new Error('Forbidden')
-        error.response = {
-          data: { error: 'Access denied' },
-          status: 403,
-          statusText: 'Forbidden',
-          headers: {},
-          config,
-        }
-        error.config = config
-        throw error
+        throw createRetryError('Forbidden', config, 403)
       }
 
       // Act: Make a GET request and catch the error
       try {
         await client.get('/test')
         expect.fail('Should have thrown an error')
-      } catch (error: any) {
-        expect(error.message).toBe('Forbidden')
+      } catch (error: unknown) {
+        expect((error as AxiosError).message).toBe('Forbidden')
       }
 
       // Assert: Should have made only 1 attempt (no retries)
@@ -532,20 +431,12 @@ describe('retryInterceptor', () => {
       const retryCounts: number[] = []
       client.defaults.adapter = async (config) => {
         retryCounts.push(config._retryCount ?? 0)
-        const error: any = new Error('Service Unavailable')
-        error.response = {
-          data: { error: 'Service temporarily unavailable' },
-          status: 503,
-          statusText: 'Service Unavailable',
-          headers: {},
-          config,
-        }
-        error.config = config
-        throw error
+        throw createRetryError('Service Unavailable', config, 503)
       }
 
       // Act: Make a GET request
       const requestPromise = client.get('/test')
+      requestPromise.catch(() => {}) // prevent unhandled-rejection flag before await
 
       // Fast-forward through all retry delays
       await vi.runAllTimersAsync()
@@ -554,8 +445,8 @@ describe('retryInterceptor', () => {
       try {
         await requestPromise
         expect.fail('Should have thrown an error')
-      } catch (error: any) {
-        expect(error.message).toBe('Service Unavailable')
+      } catch (error: unknown) {
+        expect((error as AxiosError).message).toBe('Service Unavailable')
       }
       expect(retryCounts).toEqual([0, 1, 2, 3])
     })
@@ -565,20 +456,12 @@ describe('retryInterceptor', () => {
       const isRetryFlags: boolean[] = []
       client.defaults.adapter = async (config) => {
         isRetryFlags.push(config._isRetry ?? false)
-        const error: any = new Error('Service Unavailable')
-        error.response = {
-          data: { error: 'Service temporarily unavailable' },
-          status: 503,
-          statusText: 'Service Unavailable',
-          headers: {},
-          config,
-        }
-        error.config = config
-        throw error
+        throw createRetryError('Service Unavailable', config, 503)
       }
 
       // Act: Make a GET request
       const requestPromise = client.get('/test')
+      requestPromise.catch(() => {}) // prevent unhandled-rejection flag before await
 
       // Fast-forward through all retry delays
       await vi.runAllTimersAsync()
@@ -587,8 +470,8 @@ describe('retryInterceptor', () => {
       try {
         await requestPromise
         expect.fail('Should have thrown an error')
-      } catch (error: any) {
-        expect(error.message).toBe('Service Unavailable')
+      } catch (error: unknown) {
+        expect((error as AxiosError).message).toBe('Service Unavailable')
       }
       expect(isRetryFlags).toEqual([false, true, true, true])
     })
@@ -612,7 +495,7 @@ describe('retryInterceptor', () => {
           // Assert: backoff never exceeds 10,000 ms
           expect(backoff).toBeLessThanOrEqual(10_000)
         }),
-        { numRuns: 100 }
+        { numRuns: 100 },
       )
     })
 
@@ -636,20 +519,11 @@ describe('retryInterceptor', () => {
             let attemptCount = 0
             testClient.defaults.adapter = async (config) => {
               attemptCount++
-              const error: any = new Error(`HTTP ${statusCode}`)
-              error.response = {
-                data: { error: 'Transient failure' },
-                status: statusCode,
-                statusText: `Status ${statusCode}`,
-                headers: {},
-                config,
-              }
-              error.config = config
-              throw error
+              throw createRetryError(`HTTP ${statusCode}`, config, statusCode)
             }
 
             // Act: Make a request with the generated method and catch the error
-            let caughtError: any = null
+            let caughtError: unknown = null
             const requestPromise = testClient
               .request({
                 method: method.toLowerCase(),
@@ -667,13 +541,15 @@ describe('retryInterceptor', () => {
 
             // Assert: Should have caught an error
             expect(caughtError).toBeTruthy()
-            expect(caughtError.message).toBe(`HTTP ${statusCode}`)
+            expect(
+              (caughtError as AxiosError).message,
+            ).toBe(`HTTP ${statusCode}`)
 
             // The interceptor SHALL attempt up to 3 retries (4 total attempts)
             expect(attemptCount).toBe(4)
-          }
+          },
         ),
-        { numRuns: 100 }
+        { numRuns: 100 },
       )
     })
 
@@ -684,51 +560,41 @@ describe('retryInterceptor', () => {
       // the interceptor SHALL not retry
 
       await fc.assert(
-        fc.asyncProperty(
-          fc.constantFrom('POST', 'PUT', 'PATCH', 'DELETE'),
-          async (method) => {
-            // Arrange: Create a fresh client for each property test iteration
-            const testClient = axios.create({
-              baseURL: 'http://localhost:3000',
-            })
-            applyRetryInterceptor(testClient)
+        fc.asyncProperty(fc.constantFrom('POST', 'PUT', 'PATCH', 'DELETE'), async (method) => {
+          // Arrange: Create a fresh client for each property test iteration
+          const testClient = axios.create({
+            baseURL: 'http://localhost:3000',
+          })
+          applyRetryInterceptor(testClient)
 
-            let attemptCount = 0
-            testClient.defaults.adapter = async (config) => {
-              attemptCount++
-              const error: any = new Error('Request failed')
-              error.response = {
-                data: { error: 'Any failure' },
-                status: 503,
-                statusText: 'Service Unavailable',
-                headers: {},
-                config,
-              }
-              error.config = config
-              throw error
-            }
-
-            // Act: Make a request with the generated method and catch the error
-            let caughtError: any = null
-            await testClient
-              .request({
-                method: method.toLowerCase(),
-                url: '/test',
-                data: { test: 'data' },
-              })
-              .catch((error) => {
-                caughtError = error
-              })
-
-            // Assert: Should have caught an error
-            expect(caughtError).toBeTruthy()
-            expect(caughtError.message).toBe('Request failed')
-
-            // The interceptor SHALL NOT retry (only 1 attempt)
-            expect(attemptCount).toBe(1)
+          let attemptCount = 0
+          testClient.defaults.adapter = async (config) => {
+            attemptCount++
+            throw createRetryError('Request failed', config, 503)
           }
-        ),
-        { numRuns: 100 }
+
+          // Act: Make a request with the generated method and catch the error
+          let caughtError: unknown = null
+          await testClient
+            .request({
+              method: method.toLowerCase(),
+              url: '/test',
+              data: { test: 'data' },
+            })
+            .catch((error) => {
+              caughtError = error
+            })
+
+          // Assert: Should have caught an error
+          expect(caughtError).toBeTruthy()
+          expect(
+            (caughtError as AxiosError).message,
+          ).toBe('Request failed')
+
+          // The interceptor SHALL NOT retry (only 1 attempt)
+          expect(attemptCount).toBe(1)
+        }),
+        { numRuns: 100 },
       )
     })
 
@@ -752,20 +618,11 @@ describe('retryInterceptor', () => {
             let attemptCount = 0
             testClient.defaults.adapter = async (config) => {
               attemptCount++
-              const error: any = new Error(`HTTP ${statusCode}`)
-              error.response = {
-                data: { error: 'Client error' },
-                status: statusCode,
-                statusText: `Status ${statusCode}`,
-                headers: {},
-                config,
-              }
-              error.config = config
-              throw error
+              throw createRetryError(`HTTP ${statusCode}`, config, statusCode)
             }
 
             // Act: Make a request with the generated method and status code
-            let caughtError: any = null
+            let caughtError: unknown = null
             await testClient
               .request({
                 method: method.toLowerCase(),
@@ -778,13 +635,15 @@ describe('retryInterceptor', () => {
 
             // Assert: Should have caught an error
             expect(caughtError).toBeTruthy()
-            expect(caughtError.message).toBe(`HTTP ${statusCode}`)
+            expect(
+              (caughtError as AxiosError).message,
+            ).toBe(`HTTP ${statusCode}`)
 
             // The interceptor SHALL NOT retry client errors (only 1 attempt)
             expect(attemptCount).toBe(1)
-          }
+          },
         ),
-        { numRuns: 100 }
+        { numRuns: 100 },
       )
     })
   })

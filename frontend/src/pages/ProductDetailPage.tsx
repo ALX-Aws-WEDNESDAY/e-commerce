@@ -77,7 +77,9 @@ export const ProductDetailPage: React.FC = () => {
 
           <div className="mb-6">
             <div className="flex items-center gap-4 mb-4">
-              <span className="text-3xl font-bold text-brand-600">{formatPrice(product.price)}</span>
+              <span className="text-3xl font-bold text-brand-600">
+                {formatPrice(product.price)}
+              </span>
               {product.original_price && (
                 <span className="text-xl text-gray-500 line-through">
                   {formatPrice(product.original_price)}
@@ -97,19 +99,24 @@ export const ProductDetailPage: React.FC = () => {
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-2">Seller Information</h3>
             <p className="text-gray-600">
-              <strong>Seller:</strong> {product.seller}<br />
+              <strong>Seller:</strong> {product.seller}
+              <br />
               <strong>Location:</strong> {product.location}
             </p>
           </div>
 
           <div className="space-y-4">
-            <Button 
-               size="lg" 
-               className="w-full" 
-               disabled={!product.in_stock || addToCart.isPending}
-               onClick={() => handleAddToCart(product.id)}
+            <Button
+              size="lg"
+              className="w-full"
+              disabled={!product.in_stock || addToCart.isPending}
+              onClick={() => handleAddToCart(product.id)}
             >
-              {addToCart.isPending ? 'Adding...' : product.in_stock ? 'Add to Cart' : 'Out of Stock'}
+              {addToCart.isPending
+                ? 'Adding...'
+                : product.in_stock
+                  ? 'Add to Cart'
+                  : 'Out of Stock'}
             </Button>
             <Button variant="secondary" size="lg" className="w-full">
               Save for Later
@@ -132,8 +139,10 @@ export const ProductDetailPage: React.FC = () => {
             </>
           ) : (
             <p className="text-gray-600 dark:text-gray-400">
-              <Link to="/login" className="text-brand-600 hover:underline font-medium">Sign in</Link>
-              {' '}to leave a review
+              <Link to="/login" className="text-brand-600 hover:underline font-medium">
+                Sign in
+              </Link>{' '}
+              to leave a review
             </p>
           )}
         </div>

@@ -46,7 +46,7 @@ export function ReviewForm({ productId, existingReview }: ReviewFormProps) {
             setError(null)
           },
           onError: (err: Error) => setError(err.message),
-        }
+        },
       )
     } else {
       const authorName = user ? `${user.first_name} ${user.last_name}` : ''
@@ -59,7 +59,7 @@ export function ReviewForm({ productId, existingReview }: ReviewFormProps) {
             setError(null)
           },
           onError: (err: Error) => setError(err.message),
-        }
+        },
       )
     }
   }
@@ -83,18 +83,14 @@ export function ReviewForm({ productId, existingReview }: ReviewFormProps) {
                 <Star
                   className={cn(
                     'h-7 w-7 transition-colors',
-                    filled
-                      ? 'fill-yellow-400 text-yellow-400'
-                      : 'fill-transparent text-gray-300'
+                    filled ? 'fill-yellow-400 text-yellow-400' : 'fill-transparent text-gray-300',
                   )}
                 />
               </button>
             )
           })}
         </div>
-        {error && (
-          <p className="mt-1 text-sm text-red-600">{error}</p>
-        )}
+        {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
       </div>
 
       <div>

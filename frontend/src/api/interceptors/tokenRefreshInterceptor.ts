@@ -107,7 +107,7 @@ export function applyTokenRefreshInterceptor(client: AxiosInstance): void {
         const newToken = response.data.access
 
         // Update the auth store with the new access token
-        useAuthStore.getState().setTokens(newToken, '')
+        useAuthStore.getState().setAccessToken(newToken)
 
         // Resolve all queued requests with the new token
         drainQueue(newToken)
@@ -117,8 +117,7 @@ export function applyTokenRefreshInterceptor(client: AxiosInstance): void {
         return client(originalConfig)
       } catch (refreshError) {
         // Refresh failed — clear auth state and redirect to login
-        const refreshStatus = (refreshError as { response?: { status?: number } })
-          .response?.status
+        const refreshStatus = (refreshError as { response?: { status?: number } }).response?.status
 
         if (refreshStatus === 401 || refreshStatus === 403) {
           useAuthStore.getState().clearUser()

@@ -36,8 +36,14 @@ export function useUpdateReview() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ reviewId, payload }: { reviewId: number; payload: UpdateReviewPayload; productId: number }) =>
-      reviewsApi.update(reviewId, payload),
+    mutationFn: ({
+      reviewId,
+      payload,
+    }: {
+      reviewId: number
+      payload: UpdateReviewPayload
+      productId: number
+    }) => reviewsApi.update(reviewId, payload),
     onSuccess: (_data, { productId }) => {
       queryClient.invalidateQueries({ queryKey: reviewKeys.list(productId) })
       toast.success('Review updated!')
