@@ -580,7 +580,6 @@ describe('CircuitBreaker — property-based tests', () => {
     fc.assert(
       fc.property(fc.string(), (domain) => {
         const failureThreshold = 5
-        const windowMs = 30_000
 
         // Create a fresh CircuitBreakerManager for each domain
         const manager = new CircuitBreakerManager()
@@ -644,7 +643,7 @@ describe('CircuitBreaker — property-based tests', () => {
   it('Property 10: Successful probe closes the circuit', () => {
     // Validates: Requirements 4.5
     fc.assert(
-      fc.property(fc.string(), (domain) => {
+      fc.property(fc.string(), (_domain) => {
         const failureThreshold = 5
 
         // Create a fresh CircuitBreaker and open the circuit
@@ -680,7 +679,7 @@ describe('CircuitBreaker — property-based tests', () => {
   it('Property 11: Failed probe re-opens the circuit', () => {
     // Validates: Requirements 4.6
     fc.assert(
-      fc.property(fc.string(), (domain) => {
+      fc.property(fc.string(), (_domain) => {
         const failureThreshold = 5
 
         // Create a fresh CircuitBreaker and open the circuit

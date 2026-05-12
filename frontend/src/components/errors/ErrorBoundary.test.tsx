@@ -17,7 +17,7 @@ import { ErrorBoundary } from './ErrorBoundary'
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 /** A component that unconditionally throws during render. */
-function ThrowingComponent({ message = 'Test render error' }: { message?: string }) {
+function ThrowingComponent({ message = 'Test render error' }: { message?: string }): never {
   throw new Error(message)
 }
 
@@ -143,7 +143,7 @@ describe('ErrorBoundary — Property 16: Error boundary catches any render error
     fc.assert(
       fc.property(fc.string(), (message) => {
         // Create a component that throws the arbitrary error message during render
-        function ThrowingChild() {
+        function ThrowingChild(): never {
           throw new Error(message)
         }
 

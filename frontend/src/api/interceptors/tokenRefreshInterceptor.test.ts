@@ -14,7 +14,7 @@ describe('tokenRefreshInterceptor', () => {
   let client: AxiosInstance
   let mockClearUser: ReturnType<typeof vi.fn>
   let mockSetTokens: ReturnType<typeof vi.fn>
-  let originalLocation: Location
+  let originalLocation: Partial<Location>
   let mockLocation: { href: string }
 
   beforeEach(() => {
@@ -47,7 +47,7 @@ describe('tokenRefreshInterceptor', () => {
   })
 
   afterEach(() => {
-    window.location = originalLocation
+    window.location = originalLocation as any
     vi.clearAllMocks()
   })
 
@@ -483,7 +483,7 @@ describe('tokenRefreshInterceptor - Property-Based Tests', () => {
   let client: AxiosInstance
   let mockClearUser: ReturnType<typeof vi.fn>
   let mockSetTokens: ReturnType<typeof vi.fn>
-  let originalLocation: Location
+  let originalLocation: Partial<Location>
   let mockLocation: { href: string }
 
   beforeEach(() => {
@@ -516,7 +516,7 @@ describe('tokenRefreshInterceptor - Property-Based Tests', () => {
   })
 
   afterEach(() => {
-    window.location = originalLocation
+    window.location = originalLocation as any
     vi.clearAllMocks()
   })
 
