@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '@/hooks/useCart'
 import { useCreateOrder } from '@/hooks/useOrders'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import type { ShippingAddress } from '@/types'
 
 export const CheckoutForm: React.FC = () => {

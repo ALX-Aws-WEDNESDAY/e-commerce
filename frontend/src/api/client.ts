@@ -4,14 +4,10 @@ import { applyCorrelationIdInterceptor } from '@/api/interceptors/correlationIdI
 import { applyTokenRefreshInterceptor } from '@/api/interceptors/tokenRefreshInterceptor'
 import { applyRetryInterceptor } from '@/api/interceptors/retryInterceptor'
 
-// Switch this one env var to point at real Django backend
-if (!import.meta.env.VITE_API_BASE_URL) {
-  console.warn(
-    '[apiClient] VITE_API_BASE_URL is not set — falling back to http://localhost:8000. ' +
-      'Set this env var to point at the real backend.',
-  )
-}
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+// In dev, leave VITE_API_BASE_URL unset so requests use a relative base URL
+// and Vite's proxy routes them to the correct backend service ports.
+// In production, set VITE_API_BASE_URL to the deployed API gateway URL.
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? ''
 
 export const apiClient = axios.create({
   baseURL: `${BASE_URL}/api`,

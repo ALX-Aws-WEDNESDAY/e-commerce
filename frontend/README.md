@@ -1,15 +1,18 @@
 # Elites E-Commerce Frontend
 
-Welcome to the **Elites** frontend repository. This is a modern, responsive, and production-ready e-commerce single-page application (SPA). Designed with a vibrant, ALX-inspired color palette (Spring Green & Blue Zodiac), Elites provides a seamless end-to-end shopping experience—from product discovery to checkout.
+Welcome to the **Elites** frontend repository. This is a modern, responsive, and production-ready e-commerce single-page application (SPA) built for speed, clarity, and trust. The current UI direction is **Safaricom-level confidence, but warmer**: emerald primary tones, amber accents, and high-clarity interaction design across product discovery, cart, checkout, and account flows.
 
 The project is architected to be connected to a robust Django/PostgreSQL backend infrastructure hosted on AWS.
 
 ## ✨ Key Features
 
-- **Seamless Shopping Journey**: Fully interactive product catalogs, detail pages, and a persistent slide-out cart.
+- **Redesigned Premium UI**: Warm emerald + amber visual system, typography hierarchy, and polished spacing for a more premium marketplace feel.
+- **Motion-Driven UX**: Framer Motion transitions, staggered entrances, animated cart interactions, and smooth route changes.
+- **Command Palette (Ctrl/Cmd + K)**: Power-user quick navigation and product search from anywhere in the app.
+- **Seamless Shopping Journey**: Fully interactive product catalogs, rich detail pages, and a persistent slide-out cart.
 - **Production-Ready Checkout**: Multi-step checkout form with user-friendly validation, supporting local payment methods (M-Pesa, Cash on Delivery, Card).
 - **Order Success Flow**: Dedicated, polished success confirmations providing direct feedback and reference IDs immediately after purchase.
-- **Mobile-First Responsive Design**: Beautiful UI powered by Tailwind CSS. Every grid, drawer, and action button dynamically stacks and scales for a flawless experience on smartphones and tablets.
+- **Mobile-First Responsive Design**: Every drawer, filter panel, CTA, and product action is optimized for mobile ergonomics.
 - **Secure Authentication UI**: Pre-built Login, Registration, and Account Profile screens. Includes logic for `X-CSRFToken` handling, fully prepared for Django session cookies.
 - **Microservice-Ready Architecture**: Circuit breaker pattern, correlation ID tracking, automatic retry logic, and token refresh interceptors for resilient distributed systems.
 - **Product Reviews**: Full review system with rating submission and display functionality.
@@ -18,7 +21,9 @@ The project is architected to be connected to a robust Django/PostgreSQL backend
 ## 🛠️ Tech Stack
 
 - **Framework**: React 19 + TypeScript + Vite
-- **Styling**: Tailwind CSS + Lucide Icons for clean, utility-first UI
+- **Styling**: Tailwind CSS + ShadCN UI primitives + Lucide Icons
+- **Animations**: Framer Motion
+- **Feedback**: Sonner toasts
 - **State Management**: Zustand (UI state) + React Query (Server state)
 - **Routing**: React Router v6
 - **Mock Integration**: MSW (Mock Service Worker) for frontend-first isolated development
@@ -99,6 +104,12 @@ This application adheres to strict TypeScript checking and ESLint rules to guara
 ```bash
 # Validate types and generate production bundle
 npm run build
+
+# Lint the codebase
+npm run lint
+
+# Type-check app sources
+npx tsc -p tsconfig.app.json --noEmit
 
 # Preview the minified production output
 npm run preview

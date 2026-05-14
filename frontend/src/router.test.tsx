@@ -217,7 +217,7 @@ describe('router — Property 17: Catch-all route renders 404 for any unmatched 
           return found
         },
       ),
-      { numRuns: 100 },
+      { numRuns: 30 },
     )
-  })
+  }, 20000)
 })

@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useOrders } from '@/hooks/useOrders'
 import { OrderCard } from '@/components/orders/OrderCard'
-import { toast } from 'react-hot-toast'
+import { toast } from 'sonner'
 
 export const OrdersPage: React.FC = () => {
   const location = useLocation()

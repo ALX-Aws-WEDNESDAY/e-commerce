@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { cartApi } from '@/api'
 import { useCartStore } from '@/store/cart.store'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 export const cartKeys = {
   cart: ['cart'] as const,
@@ -68,7 +68,7 @@ export function useRemoveCartItem() {
     onSuccess: (cart) => {
       setCart(cart)
       queryClient.setQueryData(cartKeys.cart, cart)
-      toast.success('Item removed')
+      toast.success('Item removed from cart')
     },
   })
 }

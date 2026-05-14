@@ -80,11 +80,16 @@ export function applyTokenRefreshInterceptor(client: AxiosInstance): void {
         return Promise.reject(error)
       }
 
-      // No refresh token cookie — session is truly expired; redirect immediately
+      // No refresh token cookie — only redirect if user was previously authenticated.
+      // Anonymous users hitting protected endpoints (e.g. /api/cart/) should get a
+      // silent rejection, not a forced redirect to login.
       if (!hasRefreshTokenCookie()) {
+        const wasAuthenticated = useAuthStore.getState().isAuthenticated
         useAuthStore.getState().clearUser()
         rejectQueue(error)
-        window.location.href = '/login'
+        if (wasAuthenticated) {
+          window.location.href = '/login'
+        }
         return Promise.reject(error)
       }
 

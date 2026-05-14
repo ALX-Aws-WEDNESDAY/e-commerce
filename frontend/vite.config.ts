@@ -19,6 +19,7 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    host: true,
     proxy: {
       '/api/users': 'http://localhost:8003',
       '/api/products': 'http://localhost:8001',

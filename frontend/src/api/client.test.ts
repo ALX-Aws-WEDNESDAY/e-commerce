@@ -17,7 +17,7 @@
  * Validates: Requirements 1.1, 1.2, 1.5
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import type { AxiosInstance } from 'axios'
 import * as fc from 'fast-check'
 
@@ -103,43 +103,38 @@ async function importFreshClient() {
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('client.ts — environment variable handling', () => {
-  let warnSpy: ReturnType<typeof vi.spyOn>
-
-  beforeEach(() => {
-    warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
-  })
-
   afterEach(() => {
-    warnSpy.mockRestore()
     vi.unstubAllEnvs()
   })
 
-  it('emits a console.warn when VITE_API_BASE_URL is empty string', async () => {
-    // Requirement 1.2: when VITE_API_BASE_URL is not set, warn and fall back
+  it('does not emit warnings when VITE_API_BASE_URL is empty string', async () => {
+    // In development, an empty base URL is expected so Vite proxies /api.
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
     vi.stubEnv('VITE_API_BASE_URL', '')
 
     await importFreshClient()
 
-    expect(warnSpy).toHaveBeenCalledOnce()
-    expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('VITE_API_BASE_URL is not set'))
+    expect(warnSpy).not.toHaveBeenCalled()
+    warnSpy.mockRestore()
   })
 
   it('does NOT emit a console.warn when VITE_API_BASE_URL is set', async () => {
-    // Requirement 1.1: when the env var is present, no warning
+    // When the env var is present, there should still be no warning.
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
     vi.stubEnv('VITE_API_BASE_URL', 'https://api.example.com')
 
     await importFreshClient()
 
     expect(warnSpy).not.toHaveBeenCalled()
+    warnSpy.mockRestore()
   })
 
-  it('uses http://localhost:8000 as the base URL when VITE_API_BASE_URL is empty', async () => {
+  it('uses relative /api base URL when VITE_API_BASE_URL is empty', async () => {
     vi.stubEnv('VITE_API_BASE_URL', '')
 
     const { apiClient } = await importFreshClient()
 
-    // The Axios instance baseURL should fall back to the default
-    expect(apiClient.defaults.baseURL).toBe('http://localhost:8000/api')
+    expect(apiClient.defaults.baseURL).toBe('/api')
   })
 
   it('uses the provided VITE_API_BASE_URL when set', async () => {

@@ -284,8 +284,8 @@ describe('Property 3.4 — X-CSRFToken header is attached on POST/PUT/PATCH/DELE
 
 // ── Property 3.5: 401 response redirects to /login ───────────────────────────
 
-describe('Property 3.5 — 401 response triggers redirect to /login', () => {
-  it('a 401 error response sets window.location.href to /login', async () => {
+describe('Property 3.5 — anonymous 401 response does not force redirect', () => {
+  it('a 401 response keeps location unchanged when user is not authenticated', async () => {
     // Stub window.location
     const locationMock = { href: '' }
     vi.stubGlobal('location', locationMock)
@@ -315,7 +315,7 @@ describe('Property 3.5 — 401 response triggers redirect to /login', () => {
       if (locationMock.href === '/login') break
     }
 
-    expect(locationMock.href).toBe('/login')
+    expect(locationMock.href).toBe('')
 
     vi.unstubAllGlobals()
   })

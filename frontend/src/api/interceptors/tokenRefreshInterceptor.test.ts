@@ -49,6 +49,7 @@ describe('tokenRefreshInterceptor', () => {
     vi.mocked(useAuthStore.getState).mockReturnValue({
       clearUser: mockClearUser,
       setAccessToken: mockSetAccessToken,
+      isAuthenticated: true,
     } as unknown as ReturnType<typeof useAuthStore.getState>)
 
     // Mock window.location

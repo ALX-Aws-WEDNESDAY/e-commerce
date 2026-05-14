@@ -1,14 +1,91 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Warm off-white background */
+    --background: 30 20% 98%;
+    --foreground: 220 40% 13%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 40% 13%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 40% 13%;
+
+    /* Warm emerald primary */
+    --primary: 158 64% 36%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Amber/gold accent */
+    --accent: 37 91% 55%;
+    --accent-foreground: 220 40% 13%;
+
+    --secondary: 217 27% 27%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 30 15% 94%;
+    --muted-foreground: 220 15% 50%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Warm border */
+    --border: 30 20% 88%;
+    --input: 30 20% 88%;
+    --ring: 158 64% 36%;
+    --radius: 0.625rem;
+  }
+
+  .dark {
+    --background: 220 40% 9%;
+    --foreground: 210 40% 96%;
+
+    --card: 220 35% 13%;
+    --card-foreground: 210 40% 96%;
+
+    --popover: 220 35% 13%;
+    --popover-foreground: 210 40% 96%;
+
+    --primary: 158 60% 42%;
+    --primary-foreground: 0 0% 100%;
+
+    --accent: 37 85% 50%;
+    --accent-foreground: 220 40% 9%;
+
+    --secondary: 217 27% 27%;
+    --secondary-foreground: 210 40% 96%;
+
+    --muted: 217 27% 20%;
+    --muted-foreground: 215 20% 60%;
+
+    --destructive: 0 63% 45%;
+    --destructive-foreground: 210 40% 96%;
+
+    --border: 217 27% 22%;
+    --input: 217 27% 22%;
+    --ring: 158 60% 42%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
   body {
     font-family: 'DM Sans', sans-serif;
-    @apply bg-gray-50 text-gray-900 dark:bg-secondary-900 dark:text-gray-100 transition-colors duration-200 antialiased;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    transition: background-color 0.2s ease, color 0.2s ease;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'tnum' on, 'lnum' on;
   }
+
   h1, h2, h3 {
     font-family: 'Playfair Display', serif;
   }
