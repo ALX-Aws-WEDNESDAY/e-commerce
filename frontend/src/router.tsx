@@ -12,6 +12,7 @@ import { AccountPage } from '@/pages/AccountPage'
 import { OrdersPage } from '@/pages/OrdersPage'
 import { CategoriesPage } from '@/pages/CategoriesPage'
 import { AboutPage } from '@/pages/AboutPage'
+import { NotFoundPage } from '@/pages/NotFoundPage'
 
 export const router = createBrowserRouter([
   {
@@ -20,7 +21,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: 'products', element: <ProductsPage /> },
-      { path: 'products/:slug', element: <ProductDetailPage /> },
+      { path: 'products/:id', element: <ProductDetailPage /> },
       { path: 'categories', element: <CategoriesPage /> },
       { path: 'about', element: <AboutPage /> },
       { path: 'cart', element: <CartPage /> },
@@ -33,4 +34,5 @@ export const router = createBrowserRouter([
   },
   { path: '/login', element: <LoginPage /> },
   { path: '/register', element: <RegisterPage /> },
+  { path: '*', element: <NotFoundPage /> },
 ])

@@ -11,12 +11,10 @@ const MOCK_USER = {
 let isLoggedIn = false
 
 export const authHandlers = [
-  http.get('/api/auth/csrf/', () =>
-    HttpResponse.json({ detail: 'CSRF cookie set' })
-  ),
+  http.get('/api/auth/csrf/', () => HttpResponse.json({ detail: 'CSRF cookie set' })),
 
   http.post('/api/auth/login/', async ({ request }) => {
-    const body = await request.json() as { email: string; password: string }
+    const body = (await request.json()) as { email: string; password: string }
     if (body.email && body.password) {
       isLoggedIn = true
       return HttpResponse.json(MOCK_USER)
@@ -30,9 +28,12 @@ export const authHandlers = [
   }),
 
   http.post('/api/auth/register/', async ({ request }) => {
-    const body = await request.json() as Record<string, string>
+    const body = (await request.json()) as Record<string, string>
     isLoggedIn = true
-    return HttpResponse.json({ ...MOCK_USER, email: body.email, first_name: body.first_name, last_name: body.last_name }, { status: 201 })
+    return HttpResponse.json(
+      { ...MOCK_USER, email: body.email, first_name: body.first_name, last_name: body.last_name },
+      { status: 201 },
+    )
   }),
 
   http.get('/api/auth/me/', () => {

@@ -1,13 +1,19 @@
-import { mockApi } from './mock.api'
-import type { CreateOrderPayload } from '@/types'
+import { apiClient } from './client'
+import type { Order, CreateOrderPayload } from '@/types'
 
 export const ordersApi = {
-  create: (data: CreateOrderPayload) =>
-    mockApi.createOrder(data),
+  create: async (data: CreateOrderPayload) => {
+    const { data: response } = await apiClient.post<Order>('/orders/', data)
+    return response
+  },
 
-  list: () =>
-    mockApi.getOrders(),
+  list: async () => {
+    const { data } = await apiClient.get<Order[]>('/orders/')
+    return data
+  },
 
-  detail: (id: number) =>
-    mockApi.getOrder(id),
-}
+  detail: async (id: number) => {
+    const { data } = await apiClient.get<Order>(`/orders/${id}/`)
+    return data
+  },
+}

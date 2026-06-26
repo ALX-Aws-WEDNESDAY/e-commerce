@@ -1,6 +1,6 @@
 export function formatPrice(price: string | number): string {
   const amount = typeof price === 'string' ? parseFloat(price) : price
-  return `KES ${amount.toLocaleString('en-KE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` 
+  return `KES ${amount.toLocaleString('en-KE', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`
 }
 
 export function formatDiscount(original: string, current: string): number {

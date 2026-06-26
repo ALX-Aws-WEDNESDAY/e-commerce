@@ -6,11 +6,18 @@ export const MOCK_PRODUCTS: Product[] = [
     id: 1,
     name: 'Solar Portable Power Bank 20,000mAh',
     slug: 'solar-power-bank-20000',
-    description: 'Dual solar panels + USB-C. Charges 3 devices simultaneously. Built for off-grid African lifestyles.',
+    description:
+      'Dual solar panels + USB-C. Charges 3 devices simultaneously. Built for off-grid African lifestyles.',
     price: '3400.00',
     original_price: undefined,
     category: MOCK_CATEGORIES[0],
-    images: [{ id: 1, url: 'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=600&h=600&fit=crop', is_primary: true }],
+    images: [
+      {
+        id: 1,
+        url: 'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=600&h=600&fit=crop',
+        is_primary: true,
+      },
+    ],
     rating: 4.7,
     review_count: 312,
     in_stock: true,
@@ -22,11 +29,18 @@ export const MOCK_PRODUCTS: Product[] = [
     id: 2,
     name: 'Wireless Earbuds Pro (Noise Cancelling)',
     slug: 'wireless-earbuds-pro',
-    description: 'Active noise cancellation, 30hr battery life, IPX5 water resistant. Local warranty included.',
+    description:
+      'Active noise cancellation, 30hr battery life, IPX5 water resistant. Local warranty included.',
     price: '4500.00',
     original_price: '6000.00',
     category: MOCK_CATEGORIES[0],
-    images: [{ id: 2, url: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&h=600&fit=crop', is_primary: true }],
+    images: [
+      {
+        id: 2,
+        url: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=600&h=600&fit=crop',
+        is_primary: true,
+      },
+    ],
     rating: 4.5,
     review_count: 178,
     in_stock: true,
@@ -38,11 +52,18 @@ export const MOCK_PRODUCTS: Product[] = [
     id: 3,
     name: 'Ankara Print Wrap Dress',
     slug: 'ankara-wrap-dress',
-    description: 'Vibrant hand-crafted Ankara print wrap dress. Perfect for any occasion, made by local Nairobi artisans.',
+    description:
+      'Vibrant hand-crafted Ankara print wrap dress. Perfect for any occasion, made by local Nairobi artisans.',
     price: '2800.00',
     original_price: '3500.00',
     category: MOCK_CATEGORIES[1],
-    images: [{ id: 3, url: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&h=600&fit=crop', is_primary: true }],
+    images: [
+      {
+        id: 3,
+        url: 'https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=600&h=600&fit=crop',
+        is_primary: true,
+      },
+    ],
     rating: 4.8,
     review_count: 124,
     in_stock: true,
@@ -58,7 +79,13 @@ export const MOCK_PRODUCTS: Product[] = [
     price: '1200.00',
     original_price: '1800.00',
     category: MOCK_CATEGORIES[1],
-    images: [{ id: 4, url: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=600&h=600&fit=crop', is_primary: true }],
+    images: [
+      {
+        id: 4,
+        url: 'https://images.unsplash.com/photo-1543163521-1bf539c55dd2?w=600&h=600&fit=crop',
+        is_primary: true,
+      },
+    ],
     rating: 4.9,
     review_count: 203,
     in_stock: true,
@@ -73,7 +100,13 @@ export const MOCK_PRODUCTS: Product[] = [
     description: 'Traditional Kenyan Kiondo baskets, hand-woven from sisal. Nesting set of 3.',
     price: '1650.00',
     category: MOCK_CATEGORIES[2],
-    images: [{ id: 5, url: 'https://images.unsplash.com/photo-1590736704728-f4730bb30770?w=600&h=600&fit=crop', is_primary: true }],
+    images: [
+      {
+        id: 5,
+        url: 'https://images.unsplash.com/photo-1590736704728-f4730bb30770?w=600&h=600&fit=crop',
+        is_primary: true,
+      },
+    ],
     rating: 4.9,
     review_count: 445,
     in_stock: true,
@@ -85,10 +118,17 @@ export const MOCK_PRODUCTS: Product[] = [
     id: 6,
     name: 'Shea Butter & Baobab Oil Moisturiser',
     slug: 'shea-baobab-moisturiser',
-    description: 'All-natural African skincare. Cold-pressed baobab oil blended with unrefined shea butter. 200ml.',
+    description:
+      'All-natural African skincare. Cold-pressed baobab oil blended with unrefined shea butter. 200ml.',
     price: '750.00',
     category: MOCK_CATEGORIES[3],
-    images: [{ id: 6, url: 'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=600&h=600&fit=crop', is_primary: true }],
+    images: [
+      {
+        id: 6,
+        url: 'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=600&h=600&fit=crop',
+        is_primary: true,
+      },
+    ],
     rating: 4.8,
     review_count: 267,
     in_stock: true,
@@ -100,10 +140,17 @@ export const MOCK_PRODUCTS: Product[] = [
     id: 7,
     name: 'Single-Origin Kenyan AA Coffee (500g)',
     slug: 'kenyan-aa-coffee-500g',
-    description: 'Direct-trade specialty coffee from Kirinyaga County. Medium roast with berry notes.',
+    description:
+      'Direct-trade specialty coffee from Kirinyaga County. Medium roast with berry notes.',
     price: '980.00',
     category: MOCK_CATEGORIES[4],
-    images: [{ id: 7, url: 'https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=600&h=600&fit=crop', is_primary: true }],
+    images: [
+      {
+        id: 7,
+        url: 'https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=600&h=600&fit=crop',
+        is_primary: true,
+      },
+    ],
     rating: 4.9,
     review_count: 534,
     in_stock: true,
@@ -118,7 +165,13 @@ export const MOCK_PRODUCTS: Product[] = [
     description: 'Lightweight trail runners. Designed for Kenyan terrain — savanna to highland.',
     price: '5500.00',
     category: MOCK_CATEGORIES[5],
-    images: [{ id: 8, url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=600&fit=crop', is_primary: true }],
+    images: [
+      {
+        id: 8,
+        url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=600&fit=crop',
+        is_primary: true,
+      },
+    ],
     rating: 4.5,
     review_count: 78,
     in_stock: true,

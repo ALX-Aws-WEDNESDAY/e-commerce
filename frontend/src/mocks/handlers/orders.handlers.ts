@@ -14,7 +14,7 @@ export const ordersHandlers = [
   }),
 
   http.post('/api/orders/', async ({ request }) => {
-    const body = await request.json() as { shipping_address: Order['shipping_address'] }
+    const body = (await request.json()) as { shipping_address: Order['shipping_address'] }
     const newOrder: Order = {
       id: orders.length + 1,
       reference: `AFM-2025-00${orders.length + 1}`,

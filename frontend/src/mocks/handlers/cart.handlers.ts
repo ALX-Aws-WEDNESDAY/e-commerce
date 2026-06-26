@@ -15,17 +15,17 @@ const sampleItems: CartItem[] = [
     product: MOCK_PRODUCTS[1], // Ankara Dress
     quantity: 2,
     subtotal: (2 * parseFloat(MOCK_PRODUCTS[1].price)).toFixed(2),
-  }
+  },
 ]
 
-let mockCart: Cart = { 
-  id: 1, 
-  items: sampleItems, 
+let mockCart: Cart = {
+  id: 1,
+  items: sampleItems,
   subtotal: '0.00',
   shipping_cost: '0.00',
   tax: '0.00',
-  total: '0.00', 
-  item_count: 0 
+  total: '0.00',
+  item_count: 0,
 }
 
 function recalcCart(): Cart {
@@ -33,7 +33,7 @@ function recalcCart(): Cart {
   const shippingCost = subtotal > 0 ? '5.00' : '0.00'
   const tax = (subtotal * 0.16).toFixed(2)
   const total = (subtotal + parseFloat(shippingCost) + parseFloat(tax)).toFixed(2)
-  
+
   mockCart.subtotal = subtotal.toFixed(2)
   mockCart.shipping_cost = shippingCost
   mockCart.tax = tax
@@ -53,7 +53,7 @@ export const cartHandlers = [
 
   http.post('/api/cart/items/', async ({ request }) => {
     console.log('[MSW] Cart POST request:', await request.text())
-    const body = await request.json() as { product_id: number; quantity: number }
+    const body = (await request.json()) as { product_id: number; quantity: number }
     const product = MOCK_PRODUCTS.find((p) => p.id === body.product_id)
     if (!product) return HttpResponse.json({ detail: 'Product not found.' }, { status: 404 })
 
@@ -76,7 +76,7 @@ export const cartHandlers = [
 
   http.patch('/api/cart/items/:id', async ({ params, request }) => {
     console.log('[MSW] Cart PATCH request:', await request.text())
-    const body = await request.json() as { quantity: number }
+    const body = (await request.json()) as { quantity: number }
     const item = mockCart.items.find((i) => i.id === Number(params.id))
     if (!item) return HttpResponse.json({ detail: 'Not found.' }, { status: 404 })
     item.quantity = body.quantity
@@ -92,14 +92,14 @@ export const cartHandlers = [
 
   http.delete('/api/cart/clear/', () => {
     console.log('[MSW] Cart CLEAR request')
-    mockCart = { 
-      id: 1, 
-      items: [], 
+    mockCart = {
+      id: 1,
+      items: [],
       subtotal: '0.00',
       shipping_cost: '0.00',
       tax: '0.00',
-      total: '0.00', 
-      item_count: 0 
+      total: '0.00',
+      item_count: 0,
     }
     return HttpResponse.json(mockCart)
   }),

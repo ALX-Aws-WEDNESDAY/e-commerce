@@ -5,7 +5,7 @@ import type { ProductFilters } from '@/types'
 export const productKeys = {
   all: ['products'] as const,
   list: (filters: ProductFilters) => [...productKeys.all, 'list', filters] as const,
-  detail: (slug: string) => [...productKeys.all, 'detail', slug] as const,
+  detail: (id: number) => [...productKeys.all, 'detail', id] as const,
   categories: () => [...productKeys.all, 'categories'] as const,
   featured: () => [...productKeys.all, 'featured'] as const,
 }
@@ -17,11 +17,11 @@ export function useProducts(filters: ProductFilters = {}) {
   })
 }
 
-export function useProduct(slug: string) {
+export function useProduct(id: number) {
   return useQuery({
-    queryKey: productKeys.detail(slug),
-    queryFn: () => productsApi.detail(slug),
-    enabled: !!slug,
+    queryKey: productKeys.detail(id),
+    queryFn: () => productsApi.detail(id),
+    enabled: !!id,
   })
 }
 

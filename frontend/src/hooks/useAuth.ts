@@ -1,42 +1,39 @@
+import { useEffect } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { authApi } from '@/api'
 import { useAuthStore } from '@/store/auth.store'
 import { useNavigate } from 'react-router-dom'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import type { LoginPayload, RegisterPayload } from '@/types'
 
 export function useMe() {
   const setUser = useAuthStore((s) => s.setUser)
-  const token = localStorage.getItem('access_token')
+  const accessToken = useAuthStore((s) => s.accessToken)
 
-  return useQuery({
+  const query = useQuery({
     queryKey: ['me'],
-    queryFn: async () => {
-      if (!token) {
-        setUser(null)
-        return null
-      }
-      try {
-        const user = await authApi.me()
-        setUser(user)
-        return user
-      } catch (error) {
-        setUser(null)
-        throw error
-      }
-    },
-    enabled: !!token,
+    queryFn: () => authApi.me(),
+    enabled: !!accessToken,
     retry: false,
   })
+
+  useEffect(() => {
+    if (query.status === 'success') setUser(query.data)
+    if (query.status === 'error') setUser(null)
+  }, [query.status, query.data, setUser])
+
+  return query
 }
 
 export function useLogin() {
   const setUser = useAuthStore((s) => s.setUser)
+  const setTokens = useAuthStore((s) => s.setTokens)
   const navigate = useNavigate()
 
   return useMutation({
     mutationFn: (data: LoginPayload) => authApi.login(data),
-    onSuccess: (user) => {
+    onSuccess: ({ user, accessToken }) => {
+      if (accessToken) setTokens(accessToken, '')
       setUser(user)
       toast.success(`Welcome back, ${user.first_name}!`)
       navigate('/')

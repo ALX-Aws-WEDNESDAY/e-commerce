@@ -1,7 +1,8 @@
+import { useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { cartApi } from '@/api'
 import { useCartStore } from '@/store/cart.store'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 export const cartKeys = {
   cart: ['cart'] as const,
@@ -9,15 +10,16 @@ export const cartKeys = {
 
 export function useCart() {
   const setCart = useCartStore((s) => s.setCart)
-
-  return useQuery({
+  const query = useQuery({
     queryKey: cartKeys.cart,
-    queryFn: async () => {
-      const cart = await cartApi.get()
-      setCart(cart)
-      return cart
-    },
+    queryFn: () => cartApi.get(),
   })
+
+  useEffect(() => {
+    if (query.data) setCart(query.data)
+  }, [query.data, setCart])
+
+  return query
 }
 
 export function useAddToCart() {
@@ -59,11 +61,14 @@ export function useRemoveCartItem() {
   const setCart = useCartStore((s) => s.setCart)
 
   return useMutation({
-    mutationFn: (itemId: number) => cartApi.removeItem(itemId),
+    mutationFn: async (itemId: number) => {
+      await cartApi.removeItem(itemId)
+      return cartApi.get()
+    },
     onSuccess: (cart) => {
       setCart(cart)
       queryClient.setQueryData(cartKeys.cart, cart)
-      toast.success('Item removed')
+      toast.success('Item removed from cart')
     },
   })
 }

@@ -2,14 +2,14 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '@/hooks/useCart'
 import { useCreateOrder } from '@/hooks/useOrders'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 import type { ShippingAddress } from '@/types'
 
 export const CheckoutForm: React.FC = () => {
   const navigate = useNavigate()
   const { data: cart, isLoading: cartLoading } = useCart()
   const createOrder = useCreateOrder()
-  
+
   const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
     full_name: '',
     phone: '',
@@ -18,32 +18,32 @@ export const CheckoutForm: React.FC = () => {
     city: '',
     county: '',
   })
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleInputChange = (field: keyof ShippingAddress, value: string) => {
-    setShippingAddress(prev => ({
+    setShippingAddress((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!cart?.items.length) {
       return
     }
 
     setIsSubmitting(true)
-    
+
     try {
       const order = await createOrder.mutateAsync({ shipping_address: shippingAddress })
       // Navigate to order-success page with the new order context
-      navigate('/order-success', { 
-        state: { 
-          newOrder: order 
-        } 
+      navigate('/order-success', {
+        state: {
+          newOrder: order,
+        },
       })
     } catch (error) {
       console.error('Checkout failed:', error)
@@ -52,10 +52,11 @@ export const CheckoutForm: React.FC = () => {
     }
   }
 
-  const isFormValid = shippingAddress.full_name && 
-    shippingAddress.phone && 
-    shippingAddress.address_line_1 && 
-    shippingAddress.city && 
+  const isFormValid =
+    shippingAddress.full_name &&
+    shippingAddress.phone &&
+    shippingAddress.address_line_1 &&
+    shippingAddress.city &&
     shippingAddress.county
 
   if (cartLoading) {
@@ -69,12 +70,10 @@ export const CheckoutForm: React.FC = () => {
   if (!cart?.items.length) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-600 dark:text-gray-300 transition-colors">Your cart is empty. Add some items before checkout.</p>
-        <Button 
-          variant="secondary" 
-          className="mt-4"
-          onClick={() => navigate('/products')}
-        >
+        <p className="text-gray-600 dark:text-gray-300 transition-colors">
+          Your cart is empty. Add some items before checkout.
+        </p>
+        <Button variant="secondary" className="mt-4" onClick={() => navigate('/products')}>
           Continue Shopping
         </Button>
       </div>
@@ -84,8 +83,10 @@ export const CheckoutForm: React.FC = () => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-transparent dark:border-secondary-700 p-6 transition-colors">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 transition-colors">Shipping Information</h2>
-        
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 transition-colors">
+          Shipping Information
+        </h2>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1 transition-colors">
@@ -99,7 +100,7 @@ export const CheckoutForm: React.FC = () => {
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1 transition-colors">
               Phone Number *
@@ -115,9 +116,7 @@ export const CheckoutForm: React.FC = () => {
         </div>
 
         <div className="mt-4">
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Address Line 1 *
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Address Line 1 *</label>
           <input
             type="text"
             value={shippingAddress.address_line_1}
@@ -152,7 +151,7 @@ export const CheckoutForm: React.FC = () => {
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1 transition-colors">
               County *
@@ -169,17 +168,28 @@ export const CheckoutForm: React.FC = () => {
       </div>
 
       <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-transparent dark:border-secondary-700 p-6 transition-colors">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 transition-colors">Order Summary</h2>
-        
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 transition-colors">
+          Order Summary
+        </h2>
+
         <div className="space-y-2 mb-4">
           {cart.items.map((item) => (
-            <div key={item.id} className="flex justify-between items-center py-2 border-b dark:border-secondary-700 transition-colors">
+            <div
+              key={item.id}
+              className="flex justify-between items-center py-2 border-b dark:border-secondary-700 transition-colors"
+            >
               <div className="flex-1">
-                <h3 className="font-medium text-gray-900 dark:text-gray-100 transition-colors">{item.product.name}</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors">Qty: {item.quantity}</p>
+                <h3 className="font-medium text-gray-900 dark:text-gray-100 transition-colors">
+                  {item.product.name}
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 transition-colors">
+                  Qty: {item.quantity}
+                </p>
               </div>
               <div className="text-right">
-                <p className="font-medium text-gray-900 dark:text-white transition-colors">KES {item.subtotal}</p>
+                <p className="font-medium text-gray-900 dark:text-white transition-colors">
+                  KES {item.subtotal}
+                </p>
               </div>
             </div>
           ))}
@@ -200,37 +210,28 @@ export const CheckoutForm: React.FC = () => {
           </div>
           <div className="flex justify-between text-lg font-semibold text-gray-900 dark:text-white transition-colors">
             <span>Total:</span>
-            <span className="text-brand-600 dark:text-brand-400 transition-colors">KES {cart.total}</span>
+            <span className="text-brand-600 dark:text-brand-400 transition-colors">
+              KES {cart.total}
+            </span>
           </div>
         </div>
       </div>
 
       <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-transparent dark:border-secondary-700 p-6 transition-colors">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 transition-colors">Payment Method</h2>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 transition-colors">
+          Payment Method
+        </h2>
         <div className="space-y-3 text-gray-700 dark:text-gray-200 transition-colors">
           <label className="flex items-center">
-            <input
-              type="radio"
-              name="payment"
-              defaultChecked
-              className="mr-3"
-            />
+            <input type="radio" name="payment" defaultChecked className="mr-3" />
             <span>Cash on Delivery</span>
           </label>
           <label className="flex items-center">
-            <input
-              type="radio"
-              name="payment"
-              className="mr-3"
-            />
+            <input type="radio" name="payment" className="mr-3" />
             <span>M-Pesa</span>
           </label>
           <label className="flex items-center">
-            <input
-              type="radio"
-              name="payment"
-              className="mr-3"
-            />
+            <input type="radio" name="payment" className="mr-3" />
             <span>Card Payment</span>
           </label>
         </div>
@@ -238,7 +239,9 @@ export const CheckoutForm: React.FC = () => {
 
       <div className="flex flex-col items-end gap-2">
         {!isFormValid && (
-          <p className="text-sm text-red-500 text-right w-full">Please fill out all required fields marked with *</p>
+          <p className="text-sm text-red-500 text-right w-full">
+            Please fill out all required fields marked with *
+          </p>
         )}
         <div className="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center gap-3 w-full">
           <Button
@@ -249,7 +252,7 @@ export const CheckoutForm: React.FC = () => {
           >
             Back to Cart
           </Button>
-          
+
           <Button
             type="submit"
             disabled={!isFormValid || isSubmitting || createOrder.isPending}

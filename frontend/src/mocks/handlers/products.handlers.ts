@@ -13,7 +13,8 @@ export const productsHandlers = [
 
     if (search) {
       results = results.filter(
-        (p) => p.name.toLowerCase().includes(search) || p.description.toLowerCase().includes(search)
+        (p) =>
+          p.name.toLowerCase().includes(search) || p.description.toLowerCase().includes(search),
       )
     }
     if (category) {
@@ -26,12 +27,10 @@ export const productsHandlers = [
     return HttpResponse.json({ count: results.length, next: null, previous: null, results })
   }),
 
-  http.get('/api/products/categories/', () =>
-    HttpResponse.json(MOCK_CATEGORIES)
-  ),
+  http.get('/api/products/categories/', () => HttpResponse.json(MOCK_CATEGORIES)),
 
   http.get('/api/products/featured/', () =>
-    HttpResponse.json(MOCK_PRODUCTS.filter((_, i) => i < 4))
+    HttpResponse.json(MOCK_PRODUCTS.filter((_, i) => i < 4)),
   ),
 
   http.get('/api/products/:slug/', ({ params }) => {

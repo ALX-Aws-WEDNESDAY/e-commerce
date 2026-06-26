@@ -1,161 +1,267 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { ArrowRight, Truck, ShieldCheck, Lock, Star } from 'lucide-react'
 import { useFeaturedProducts } from '@/hooks/useProducts'
-import { useAddToCart } from '@/hooks/useCart'
-import { Button } from '@/components/ui/Button'
-import { Badge } from '@/components/ui/Badge'
-import { StarRating } from '@/components/ui/StarRating'
-import { formatPrice, formatDiscount } from '@/utils/formatPrice'
-import { ArrowRight, Truck, ShieldCheck, Lock } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { ProductCard } from '@/components/products/ProductCard'
+import { Skeleton } from '@/components/ui/skeleton'
+import { staggerContainer, fadeUp, slideFromRight, listItem } from '@/lib/animations'
+
+const HERO_IMAGES = [
+  'https://images.unsplash.com/photo-1579027989536-b7b1f875659b?w=400&q=80',
+  'https://images.unsplash.com/photo-1588421357574-87938a86fa28?w=400&q=80',
+  'https://images.unsplash.com/photo-1613514785940-daed07799d9b?w=400&q=80',
+  'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&q=80',
+]
+
+const TRUST_ITEMS = [
+  { icon: Truck, label: 'Fast Delivery', sub: 'Across Kenya in 2–5 days' },
+  { icon: ShieldCheck, label: 'Verified Sellers', sub: 'Every seller is vetted' },
+  { icon: Lock, label: 'Secure Checkout', sub: 'M-Pesa, card & bank' },
+]
+
+const STATS = [
+  { value: '10K+', label: 'Happy customers' },
+  { value: '500+', label: 'Local sellers' },
+  { value: '5K+', label: 'Products' },
+]
 
 export const HomePage: React.FC = () => {
   const { data: featuredProducts, isLoading, error } = useFeaturedProducts()
-  const addToCart = useAddToCart()
-
-  const handleAddToCart = (productId: number) => {
-    addToCart.mutate({ productId, quantity: 1 })
-  }
 
   return (
-    <div className="space-y-16">
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-brand-50 to-brand-100 dark:from-secondary-900 dark:to-secondary-800 py-20 transition-colors duration-200">
+    <div>
+      {/* ── Hero ── */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-background via-background to-primary/5 py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6 transition-colors">
-              Discover Authentic
-              <span className="text-brand-600 dark:text-brand-400 transition-colors"> African Products</span>
-            </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto transition-colors">
-              Connect with local artisans and businesses across Kenya. 
-              Quality products, fair prices, and authentic craftsmanship.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/products">
-                <Button size="lg">
-                  Start Shopping
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <Button variant="secondary" size="lg">
-                Learn More
-              </Button>
-            </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            {/* Left: copy */}
+            <motion.div
+              variants={staggerContainer}
+              initial="hidden"
+              animate="visible"
+              className="max-w-xl"
+            >
+              <motion.div variants={fadeUp} className="mb-4">
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wider uppercase text-primary bg-primary/10 px-3 py-1.5 rounded-full">
+                  <Star className="h-3 w-3 fill-primary" />
+                  Kenya's authentic marketplace
+                </span>
+              </motion.div>
+
+              <motion.h1
+                variants={fadeUp}
+                className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-[1.1] mb-6 font-display"
+              >
+                Discover{' '}
+                <span className="text-primary">Authentic</span>
+                <br />
+                African Products
+              </motion.h1>
+
+              <motion.p
+                variants={fadeUp}
+                className="text-lg text-muted-foreground leading-relaxed mb-8"
+              >
+                Connect with local artisans and businesses across Kenya. Quality products,
+                fair prices, and authentic craftsmanship — delivered to your door.
+              </motion.p>
+
+              <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3 mb-10">
+                <Link to="/products">
+                  <Button size="lg" className="gap-2 w-full sm:w-auto">
+                    Start Shopping <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link to="/categories">
+                  <Button variant="outline" size="lg" className="w-full sm:w-auto">
+                    Browse Categories
+                  </Button>
+                </Link>
+              </motion.div>
+
+              {/* Stats */}
+              <motion.div variants={fadeUp} className="flex items-center gap-8">
+                {STATS.map((s) => (
+                  <div key={s.label}>
+                    <p className="text-2xl font-bold text-foreground font-display">{s.value}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{s.label}</p>
+                  </div>
+                ))}
+              </motion.div>
+            </motion.div>
+
+            {/* Right: image mosaic */}
+            <motion.div
+              variants={slideFromRight}
+              initial="hidden"
+              animate="visible"
+              className="relative hidden lg:block"
+            >
+              <div className="grid grid-cols-2 gap-3 relative">
+                {/* Decorative accent */}
+                <div className="absolute -top-4 -right-4 w-32 h-32 bg-amber-400/20 rounded-3xl -z-10" />
+                <div className="absolute -bottom-6 -left-6 w-24 h-24 bg-primary/15 rounded-2xl -z-10" />
+
+                {HERO_IMAGES.map((src, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15 + i * 0.1, duration: 0.5, ease: 'easeOut' }}
+                    className={`overflow-hidden rounded-2xl shadow-lg ${
+                      i === 0 ? 'row-span-1' : ''
+                    } ${i === 1 ? 'mt-6' : ''} ${i === 3 ? '-mt-6' : ''}`}
+                  >
+                    <img
+                      src={src}
+                      alt=""
+                      className="w-full h-44 object-cover"
+                      loading="eager"
+                    />
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Value Propositions */}
-      <section className="py-16 bg-white dark:bg-secondary-900 transition-colors duration-200">
+      {/* ── Trust strip ── */}
+      <section className="border-y bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-brand-100 dark:bg-brand-900/30 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors">
-                <Truck className="h-8 w-8 text-brand-600 dark:text-brand-400" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white transition-colors">Fast Delivery</h3>
-              <p className="text-gray-600 dark:text-gray-400 transition-colors">Quick and reliable delivery across Kenya</p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-brand-100 dark:bg-brand-900/30 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors">
-                <ShieldCheck className="h-8 w-8 text-brand-600 dark:text-brand-400" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white transition-colors">Authentic Products</h3>
-              <p className="text-gray-600 dark:text-gray-400 transition-colors">Genuine items from verified local sellers</p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-brand-100 dark:bg-brand-900/30 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors">
-                <Lock className="h-8 w-8 text-brand-600 dark:text-brand-400" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2 text-gray-900 dark:text-white transition-colors">Secure Payment</h3>
-              <p className="text-gray-600 dark:text-gray-400 transition-colors">Safe and secure payment methods</p>
-            </div>
-          </div>
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border"
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-60px' }}
+          >
+            {TRUST_ITEMS.map((item) => (
+              <motion.div
+                key={item.label}
+                variants={listItem}
+                className="flex items-center gap-4 py-5 sm:py-6 px-6 sm:px-8"
+              >
+                <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <item.icon className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-semibold text-sm text-foreground">{item.label}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{item.sub}</p>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
       </section>
 
-      {/* Featured Products */}
-      <section className="py-16 bg-gray-50 dark:bg-secondary-900/50 transition-colors duration-200 border-t border-transparent dark:border-secondary-800">
+      {/* ── Featured Products ── */}
+      <section className="py-16 md:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4 transition-colors">Featured Products</h2>
-            <p className="text-lg text-gray-600 dark:text-gray-400 transition-colors">Discover our handpicked selection of amazing products</p>
-          </div>
+          <motion.div
+            className="flex items-end justify-between mb-10"
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
+            <div>
+              <h2 className="text-3xl font-bold text-foreground font-display mb-2">
+                Featured Products
+              </h2>
+              <p className="text-muted-foreground">
+                Handpicked selection from Kenya's best sellers
+              </p>
+            </div>
+            <Link
+              to="/products"
+              className="hidden sm:flex items-center gap-1.5 text-sm font-medium text-primary hover:gap-2.5 transition-all group"
+            >
+              View all
+              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </motion.div>
 
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="bg-white dark:bg-secondary-800 border border-transparent dark:border-secondary-700 rounded-lg shadow-sm overflow-hidden">
-                  <div className="h-48 bg-gray-200 dark:bg-secondary-700 animate-pulse transition-colors"></div>
-                  <div className="p-4 space-y-2">
-                    <div className="h-4 bg-gray-200 dark:bg-secondary-700 animate-pulse rounded transition-colors"></div>
-                    <div className="h-4 bg-gray-200 dark:bg-secondary-700 animate-pulse rounded w-3/4 transition-colors"></div>
+                <div key={i} className="space-y-3">
+                  <Skeleton className="h-52 w-full rounded-2xl" />
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <div className="flex justify-between">
+                    <Skeleton className="h-5 w-20" />
+                    <Skeleton className="h-8 w-24 rounded-lg" />
                   </div>
                 </div>
               ))}
             </div>
           ) : error ? (
             <div className="text-center py-12">
-              <p className="text-red-600">Failed to load featured products</p>
+              <p className="text-muted-foreground">Failed to load featured products</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <motion.div
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: '-60px' }}
+            >
               {featuredProducts?.map((product) => (
-                <div key={product.id} className="bg-white dark:bg-secondary-800 border border-transparent dark:border-secondary-700 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
-                  <div className="relative">
-                    <Link to={`/products/${product.slug}`}>
-                      <img
-                        src={product.images[0]?.url}
-                        alt={product.name}
-                        className="w-full aspect-[4/3] object-cover hover:opacity-90 transition-opacity"
-                      />
-                    </Link>
-                    {product.original_price && (
-                      <Badge variant="sale" className="absolute top-2 left-2">
-                        -{formatDiscount(product.original_price, product.price)}%
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <Link to={`/products/${product.slug}`}>
-                      <h3 className="font-medium text-gray-900 dark:text-gray-100 mb-1 line-clamp-2 hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
-                        {product.name}
-                      </h3>
-                    </Link>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{product.location}</p>
-                    <StarRating rating={product.rating} reviewCount={product.review_count} size="sm" />
-                    <div className="mt-3 flex items-center justify-between">
-                      <div>
-                        <span className="text-lg font-bold text-brand-600 dark:text-brand-400 transition-colors">{formatPrice(product.price)}</span>
-                        {product.original_price && (
-                          <span className="text-sm text-gray-500 dark:text-gray-400 line-through ml-2 transition-colors">
-                            {formatPrice(product.original_price)}
-                          </span>
-                        )}
-                      </div>
-                      <Button 
-                        size="sm" 
-                        onClick={() => handleAddToCart(product.id)}
-                        disabled={!product.in_stock || addToCart.isPending}
-                        className="whitespace-nowrap"
-                      >
-                        {addToCart.isPending ? 'Adding...' : 'Add to Cart'}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
+                <motion.div key={product.id} variants={listItem}>
+                  <ProductCard product={product} />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
 
-          <div className="text-center mt-12">
+          <motion.div
+            className="text-center mt-10 sm:hidden"
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
             <Link to="/products">
-              <Button variant="secondary" size="lg">
-                View All Products
-                <ArrowRight className="ml-2 h-5 w-5" />
+              <Button variant="outline" size="lg" className="gap-2">
+                View All Products <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
-          </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ── Promo banner ── */}
+      <section className="py-12 md:py-16 bg-secondary-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            className="flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left"
+            variants={fadeUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+          >
+            <div>
+              <h2 className="text-2xl font-bold text-white font-display mb-1">
+                Are you a Kenyan seller?
+              </h2>
+              <p className="text-secondary-300 text-sm">
+                Join 500+ artisans and businesses already selling on Elites.
+              </p>
+            </div>
+            <Link to="/register" className="shrink-0">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-white/30 text-white hover:bg-white/10 gap-2"
+              >
+                Start Selling <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </motion.div>
         </div>
       </section>
     </div>

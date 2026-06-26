@@ -15,15 +15,11 @@ export const Spinner = React.forwardRef<HTMLDivElement, SpinnerProps>(
     }
 
     return (
-      <div
-        ref={ref}
-        className={cn('flex items-center justify-center', className)}
-        {...props}
-      >
+      <div ref={ref} className={cn('flex items-center justify-center', className)} {...props}>
         <Loader2 className={cn('animate-spin text-brand-600', sizes[size])} />
       </div>
     )
-  }
+  },
 )
 
 Spinner.displayName = 'Spinner'

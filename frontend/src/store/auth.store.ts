@@ -9,6 +9,7 @@ type AuthStore = {
   refreshToken: string | null
   setUser: (user: User | null) => void
   setTokens: (accessToken: string, refreshToken: string) => void
+  setAccessToken: (accessToken: string) => void
   clearUser: () => void
 }
 
@@ -21,8 +22,24 @@ export const useAuthStore = create<AuthStore>()(
       refreshToken: null,
       setUser: (user) => set({ user, isAuthenticated: !!user }),
       setTokens: (accessToken, refreshToken) => set({ accessToken, refreshToken }),
-      clearUser: () => set({ user: null, isAuthenticated: false, accessToken: null, refreshToken: null }),
+      setAccessToken: (accessToken) => set({ accessToken }),
+      clearUser: () =>
+        set({ user: null, isAuthenticated: false, accessToken: null, refreshToken: null }),
     }),
-    { name: 'auth-store' }
-  )
+    {
+      name: 'auth-store',
+      partialize: (s) => ({ user: s.user, isAuthenticated: s.isAuthenticated }),
+      merge: (_persisted, current) => {
+        const persisted = _persisted as Partial<AuthStore>
+        return {
+          ...current,
+          user: persisted.user ?? null,
+          isAuthenticated: persisted.isAuthenticated ?? false,
+          // Tokens are never rehydrated from localStorage — in-memory only
+          accessToken: null,
+          refreshToken: null,
+        }
+      },
+    },
+  ),
 )

@@ -1,6 +1,6 @@
 import React from 'react'
 import { useAuthStore } from '@/store/auth.store'
-import { Button } from '@/components/ui/Button'
+import { Button } from '@/components/ui/button'
 
 export const AccountProfile: React.FC = () => {
   const user = useAuthStore((state) => state.user)
@@ -21,8 +21,10 @@ export const AccountProfile: React.FC = () => {
 
   return (
     <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm border border-transparent dark:border-secondary-700 p-6 transition-colors">
-      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">Profile Information</h2>
-      
+      <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+        Profile Information
+      </h2>
+
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -33,7 +35,7 @@ export const AccountProfile: React.FC = () => {
               {user.first_name}
             </div>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Last Name
@@ -69,14 +71,9 @@ export const AccountProfile: React.FC = () => {
 
       <div className="mt-6 pt-6 border-t">
         <div className="flex justify-between items-center">
-          <Button variant="secondary">
-            Edit Profile
-          </Button>
-          
-          <Button
-            onClick={handleLogout}
-            className="text-red-600 hover:text-red-700"
-          >
+          <Button variant="secondary">Edit Profile</Button>
+
+          <Button onClick={handleLogout} className="text-red-600 hover:text-red-700">
             Logout
           </Button>
         </div>
